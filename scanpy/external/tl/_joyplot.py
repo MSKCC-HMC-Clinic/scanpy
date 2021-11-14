@@ -13,7 +13,7 @@ def adata_to_gene_expression_df(
     adata: AnnData, 
     x: str,
     y: str,
-    genes: Optional[Sequence[str]] = None
+    genes: str
 ):
     """\
     Generate dataframe of grouping column (leiden, louvain, etc.) with corresponding gene expression columns.
@@ -70,10 +70,8 @@ def adata_to_gene_expression_df(
     
     if len(genes) > 8: 
         print("WARNING: Consider using fewer genes for better performance.")
-    if genes:
-        genes_of_interest = [e for e in list(adata.var_names) if e in genes]
-    else: 
-        genes_of_interest = list(adata.var_names)
+    
+    genes_of_interest = [e for e in list(adata.var_names) if e in genes]
     
     x_input = x.replace('[', '.').replace(']', '.').replace("'", "").split(".")
     if "X" in x_input: 
@@ -81,11 +79,11 @@ def adata_to_gene_expression_df(
                 adata,
                 keys=[y, *genes_of_interest]
             )
-    if "obsm" in x_input:
+    elif "obsm" in x_input:
         obsm_key = x_input[-2] #will be imputed_data
         var_locs = []
         for gene in genes:
-            var_locs.append(adata.var_names.get_loc(str(gene)))
+            var_locs.append(adata_epi.var_names.get_loc(str(gene)))
     
         tuple_list = []
         for var_loc in var_locs:
@@ -98,16 +96,18 @@ def adata_to_gene_expression_df(
             )
         df.columns = [df.columns[0]]+genes
         
-    if "layers" in x_input:
+    elif "layers" in x_input:
         layer_key = x_input[-2] #will be something like 'norm_count'
         df = pd.DataFrame(adata.obs[y]).reset_index(drop=True)
         for gene in genes:
             add = pd.DataFrame(adata.layers[layer_key][:, adata.var_names.get_loc(gene)])
             add.columns = [gene]
             df = pd.concat([df,add], axis = 1).reset_index(drop=True)
+    else: 
+        print("WARNING: Please provide a valid clustering input, e.g. adata.X.")
     return df.sort_values(by=[y]).reset_index(drop=True) #df of gene expression with grouping
 
-def gene_expression_joyplot(
+def joyplot(
     df: pd.DataFrame, 
     grouping: str,
     x_label: Optional['str'] = None,
@@ -120,7 +120,7 @@ def gene_expression_joyplot(
     color: Optional['str'] = None,
     alpha: Optional[float] = 0.5,
     compute_wasserstein: Optional[bool] = True,
-    view_y_axis: Optional[bool] = True
+    view_y_axis: Optional[bool] = False
 ):
     """\
     Generate joyplot given a dataframe of grouping and numeric categories (e.g. gene expression) as columns. 
@@ -234,5 +234,3 @@ def gene_expression_joyplot(
         fig.savefig(output_file, format = output_file.split(".")[-1], dpi = dpi)
     else:
         print("WARNING: Please make sure your dataframe contains the grouping (leiden, louvain, etc.) you are interested in as a column name.")
-
-
