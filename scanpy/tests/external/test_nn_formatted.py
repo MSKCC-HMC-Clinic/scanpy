@@ -8,10 +8,10 @@ import scanpy as sc
 import scanpy.external as sce
 
 # Import neighbor testing functionality
-from scanpy.tests.test_neighbors import get_neighbors
+#from scanpy.tests.test_neighbors import get_neighbors
 from scanpy import Neighbors
 
-pytest.importorskip("nn_formatted")
+#pytest.importorskip("nn_formatted")
 
 # the input data
 X = [[1, 0], [3, 0], [5, 6], [0, 4]]
@@ -40,7 +40,7 @@ nearest_cells = [
 def test_nn_formatted():
     # Compute neighbors, neighbors_formatted
     sc.pp.neighbors(adata, method='umap', n_neighbors=n_neighbors)
-    sc.external.pp.nn_formatted(adata)
+    sce.pp.nn_formatted(adata)
 
     k_nearest = adata.uns['neighbors_formatted']['k_nearest']
     k_nearest_dists = adata.uns['neighbors_formatted']['k_nearest_dists']
