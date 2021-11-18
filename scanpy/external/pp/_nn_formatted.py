@@ -4,7 +4,7 @@ import numpy as np
 import warnings
 from scipy.sparse import issparse, coo_matrix, csr_matrix
 from anndata import AnnData
-from .. import settings
+#from .. import settings
 
 def nearest_neighbors_formatted(
     adata: AnnData,
