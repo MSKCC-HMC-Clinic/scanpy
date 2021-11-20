@@ -6,8 +6,7 @@ dir.create(Sys.getenv("R_LIBS_USER"), recursive = TRUE)  # create personal libra
 .libPaths(Sys.getenv("R_LIBS_USER"))  # add to the path
 
 
-install.packages(c("devtools"), repos = "http://cran.us.r-project.org")
-
+install.packages(c("rtools,devtools"), repos = "http://cran.us.r-project.org")
 library(devtools)
 install_github("ctlab/fgsea")
 library(fgsea)
