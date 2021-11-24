@@ -2,30 +2,20 @@ import pytest
 
 import scanpy as sc
 import scanpy.external as sce
-
-from functools import partial
-from pathlib import Path
-import sys
-from itertools import repeat, chain, combinations
-
-from matplotlib.testing import setup
-
-import matplotlib as mpl
-import numpy as np
 import pandas as pd
 from matplotlib.testing.compare import compare_images
-import anndata
-from anndata import AnnData
-import joypy
-from scipy.stats import wasserstein_distance
+from pathlib import Path
 
 # pytest.importorskip("joyplot")
 
-HERE: Path = Path(__file__).parent.parent
-ROOT = HERE / '_images'
-FIGS = HERE / 'figures'
+HERE: Path = Path(__file__).parent
+# ROOT = HERE / '_images'
+# FIGS = HERE / 'figures'
 
 def test_joyplot():
+    """
+    Test that joyplt works
+    """
     adata = sc.datasets.pbmc68k_reduced()
     sc.tl.leiden(adata)
     #     adata.to_df()
@@ -37,12 +27,11 @@ def test_joyplot():
                             color = ['skyblue','lightpink','red'], x_range = (-4,4), output_file = "joyplottest.png",x_label="Expression range")
 
 
-    compare_images('joyplottest.png','master_joyplot.png', tol = 10)
+    assert compare_images('joyplottest.png',str(HERE)+'/master_joyplot.png', tol = 10)
 
 def main():
-    print("HI")
     test_joyplot()
-    print("hello")
+    print("Test passed")
 
 if __name__=="__main__":
     main()   
