@@ -6,7 +6,7 @@ import pandas as pd
 from matplotlib.testing.compare import compare_images
 from pathlib import Path
 
-# pytest.importorskip("joyplot")
+pytest.importorskip("joyplot")
 
 HERE: Path = Path(__file__).parent
 # ROOT = HERE / '_images'
@@ -20,7 +20,7 @@ def test_joyplot():
     sc.tl.leiden(adata)
     #     adata.to_df()
     df = sce.tl.adata_to_gene_expression_df(
-        adata, "adata.X", "leiden", ["HES4","TNFRSF4","SSU72"]
+        adata, "leiden", ["HES4","TNFRSF4","SSU72"]
     )
     # df
     sce.tl.joyplot(df = df, grouping = "leiden", title = "Gene expression per cluster", 
