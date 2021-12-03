@@ -68,7 +68,7 @@ def joyplot(
     
     Example
     --------
-    >>> gene_expression_joyplot(df = df_leiden_two_genes, grouping = "leiden", title = "Gene expression per leiden cluster", color = ['skyblue','lightpink'])
+    >>> joyplot(df = df_leiden_two_genes, grouping = "leiden", title = "Gene expression per leiden cluster", color = ['skyblue','lightpink'])
     """
     if grouping in df.columns: 
         if len(list(df.columns))>10:
@@ -205,7 +205,7 @@ def df_to_joyplot(
     
     Example
     --------
-    >>> gene_expression_joyplot(df = df_leiden_two_genes, grouping = "leiden", title = "Gene expression per leiden cluster", color = ['skyblue','lightpink'])
+    >>> df_to_joyplot(adata, "leiden", ["TNFRSF4","CPSF3L"], title = "Gene expression per leiden cluster", color = ['skyblue','lightpink'])
     """
     df = sce.tl.adata_to_gene_expression_df(
         adata, y, genes, layer
