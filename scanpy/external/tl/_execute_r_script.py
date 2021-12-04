@@ -9,16 +9,10 @@ HERE = Path(__file__).parent
 
 def testR (rscript="test.R"):
 
-    # current_dir = Path(os.getcwd())
-    # rdir = current_dir / rfile
-    # scanpy uses here notation, but getting __file__ undefined errors
-    # HERE = Path(__file__).parent 
-    print(HERE)
-    rdir = Path(HERE, rscript)
-
-    # rcode = subprocess("./test.R")
-    subprocess.call (["C:/Program Files/R/R-4.1.2/bin/Rscript", "--vanilla", rdir])
-    # subprocess.call (["C:/Program Files/R/R-4.1.2/bin/Rscript", "--vanilla", "C:/Users/qjuli/Downloads/Harvey Mudd/Clinic/scanpy/scanpy/external/tl/test.R"])
+    path2rscript = Path(HERE, rscript)
+    command = "C:/Program Files/R/R-4.1.2/bin/Rscript"
+    arg = '--vanilla'
+    subprocess.call ([command, arg, path2rscript])
 
 
 
