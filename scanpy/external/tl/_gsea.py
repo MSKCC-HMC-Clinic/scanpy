@@ -121,10 +121,25 @@ def test ():
     # download and install a bioconductor package
     bioclite("<name of the bioconductor package>")
 
+# from pathlib import Path
+# HERE = Path(__file__).parent 
+
 def testR ():
-    import subprocess
+    import subprocess, os
+    from pathlib import Path
+
+    rfile = "test.R"
+    current_dir = Path(os.getcwd())
+    rdir = current_dir / rfile
+    # scanpy uses here notation, but getting __file__ undefined errors
+    # HERE = Path(__file__).parent 
+    print(rdir)
+    print(HERE)
+
     # rcode = subprocess("./test.R")
-    subprocess.call (["C:/Program Files/R/R-4.1.2/bin/Rscript", "--vanilla", "C:/Users/qjuli/Downloads/Harvey Mudd/Clinic/scanpy/scanpy/external/tl/test.R"])
+    # subprocess.call (["C:/Program Files/R/R-4.1.2/bin/Rscript", "--vanilla", "C:/Users/qjuli/Downloads/Harvey Mudd/Clinic/scanpy/scanpy/external/tl/test.R"])
+    # subprocess.call (["C:/Program Files/R/R-4.1.2/bin/Rscript", "--vanilla", "C:/Users/qjuli/Downloads/Harvey Mudd/Clinic/scanpy/scanpy/external/tl/test.R"])
+
 
 def test_plot():
     from matplotlib.testing.compare import compare_images
