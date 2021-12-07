@@ -7,7 +7,7 @@ import subprocess, os
 
 HERE = Path(__file__).parent 
 
-def testR (
+def execute_r_script (
     rscript_path: str,
     arguments: Optional['list'] = None,
     r_filename: str = 'test.R',
