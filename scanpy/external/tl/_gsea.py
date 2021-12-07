@@ -107,27 +107,3 @@ def gsea_barplot(
 
     except KeyError:
       print('ERROR: key \'' + str(score) + '\' is not in provided dataframe')
-
-def test ():
-    import rpy2
-    import rpy2.robjects as robjects
-    from rpy2.robjects.packages import importr
-    base = importr('base')
-
-    # evaluate locally a remote R script
-    base.source("http://www.bioconductor.org/biocLite.R")
-    bioclite = robjects.globalenv['biocLite']
-
-    # download and install a bioconductor package
-    bioclite("<name of the bioconductor package>")
-
-def testR ():
-    import subprocess
-    # rcode = subprocess("./test.R")
-    subprocess.call (["C:/Program Files/R/R-4.1.2/bin/Rscript", "--vanilla", "C:/Users/qjuli/Downloads/Harvey Mudd/Clinic/scanpy/scanpy/external/tl/test.R"])
-
-def test_plot():
-    from matplotlib.testing.compare import compare_images
-    gseapy_df = pd.read_csv('.\gseapy_sample_df.csv')
-    gsea_barplot(gseapy_df, score = 'nes', color = ['b','r'], out_dir = 'gsea_test.png')
-    assert compare_images('gsea_test.png', 'gseabarplot.png', tol=5) is None
