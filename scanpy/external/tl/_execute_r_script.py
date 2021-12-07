@@ -8,14 +8,20 @@ import subprocess, os
 HERE = Path(__file__).parent 
 
 def testR (
-    r_filename: str = 'test.R'
+    rscript_path: str,
+    arguments: Optional['list'] = None,
+    r_filename: str = 'test.R',
 ):
     """\
     
     Parameters
     ----------
+    rscript_path
+        Path to local directory of Rscript.exe
     r_filename
         Filename of R script to run
+    arguments
+        optional list of arguments to add to command
    
     Returns
     -------
@@ -35,6 +41,12 @@ def testR (
     """
  
     path2rscript = Path(HERE, r_filename)
-    command = "/Library/Frameworks/R.framework/Versions/3.6/Resources/Rscript"
+    # command = "/Library/Frameworks/R.framework/Versions/3.6/Resources/Rscript"
+    # command = rscript_path
     arg = '--vanilla'
-    subprocess.call ([command, arg, path2rscript])
+
+    # add optional arguments for the R script
+    if arguments is not None:
+        arguments += [arg]
+        arg = " ".join(arguments)
+    subprocess.call ([rscript_path, arg, path2rscript])
