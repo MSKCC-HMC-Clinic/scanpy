@@ -107,3 +107,106 @@ def gsea_barplot(
 
     except KeyError:
       print('ERROR: key \'' + str(score) + '\' is not in provided dataframe')
+
+def gsea(
+    input_gene_ranking_file: str,
+    hallmark_gene_sets_file: Optional['str'] = None,
+    hallmark_gene_sets_list: Optional[list] = None,
+    type: str = 'gseapy',
+    out_dir: Optional['str'] = "gsea_data.csv"
+):
+  
+    """\
+    
+    Parameters
+    ----------
+    input_gene_ranking_file
+        Name of .rnk or .csv file of two columns. First column is gene names and
+        second column is their respective rankings by weight
+    hallmark_gene_sets_file
+        Name of .gmt file
+    hallmark_gene_sets_list
+        List of hallmark gene set names
+    type
+        Type of GSEA: “gseapy” (default) or “fgsea”
+    out_dir
+        Name of output file, saved as .csv
+
+   
+    Returns
+    -------
+    Pandas dataframe of GSEA results
+    
+    Notes
+    -------
+    For hallmark_gene_sets, user must either provide a .gmt file or list of genes
+    
+    Resulting table has columns of both gseapy and fgsea results, but may be NaN
+    based on the type of GSEA chosen
+
+    gseapy specific columns: 'fdr' (false discovery rate)
+    fgsea specific columns: 'padj' (adjusted p-value), 'log2error'
+
+    For both fgsea and gseapy, the bounds for the minimum and maximum number 
+    of genes that are also in the gene set are as follows
+    minsize = 15
+    maxsize = 500
+
+
+    Example
+    -------
+    >>> gsea_df = scanpy.external.tl.gsea('rank.rnk', 'genes.gmt', 'fgsea')
+
+    """
+    if hallmark_gene_sets_file is not None and hallmark_gene_sets_list is not None:
+        raise ValueError(
+            'You can\'t specify both a hallmark_gene_sets_file, hallmark_gene_sets_list. ' 'Please select only one.'
+        )
+    
+    if type == 'gseapy':
+
+        import gseapy as gp
+
+        # read in preranked gene list, .rnk or .csv accepted
+        rnk = pd.read_csv(input_gene_ranking_file, header=None, sep="\t")
+
+        # both .gmt or list of pathways accepted for hallmark_gene_sets
+        hallmark_gene_sets = hallmark_gene_sets_list if hallmark_gene_sets_list else hallmark_gene_sets_file
+
+        # run gseapy, returns a prerank object
+        pre_res = gp.prerank(rnk=rnk, gene_sets=hallmark_gene_sets, 
+                    #  processes=4,
+                    #  permutation_num=100, # reduce number to speed up testing
+                    #  outdir='test/prerank_report_kegg', # don't need to output intermediate files
+                    #  format='png',
+                    seed=0)
+        
+        gseapy_df = pre_res.res2d
+
+        gseapy_df.to_csv(out_dir, index=False)
+
+        return gseapy_df
+        
+    elif type == 'fgsea':
+        # run fgsea
+        print("fgsea")
+        
+        if hallmark_gene_sets_file is not None:
+            # input is .gmt file
+            # have to use gage read list...so we need to pass in the filename
+            # execute r function will need to pass in provided arguments??
+            # or do we prep known files???
+
+            # for now just use "expected file names to load in" and prep inputs here
+
+            print("x")
+
+        else:
+            # input is list of pathways
+            print("x")
+        
+    else:
+        raise ValueError(
+            'Please select either "fgsea" or "gseapy" (default).'
+        )
+
