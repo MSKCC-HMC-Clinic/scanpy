@@ -2,6 +2,7 @@ from typing import Optional, Tuple
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import scanpy.external as sce
 
 def gsea_barplot(
     df: pd.DataFrame, 
@@ -117,7 +118,6 @@ def gsea(
 ):
   
     """\
-    
     Parameters
     ----------
     input_gene_ranking_file
@@ -152,7 +152,6 @@ def gsea(
     minsize = 15
     maxsize = 500
 
-
     Example
     -------
     >>> gsea_df = scanpy.external.tl.gsea('rank.rnk', 'genes.gmt', 'fgsea')
@@ -163,6 +162,8 @@ def gsea(
             'You can\'t specify both a hallmark_gene_sets_file, hallmark_gene_sets_list. ' 'Please select only one.'
         )
     
+    hallmark_gene_sets = hallmark_gene_sets_list if hallmark_gene_sets_list else hallmark_gene_sets_file
+    
     if type == 'gseapy':
 
         import gseapy as gp
@@ -171,8 +172,6 @@ def gsea(
         rnk = pd.read_csv(input_gene_ranking_file, header=None, sep="\t")
 
         # both .gmt or list of pathways accepted for hallmark_gene_sets
-        hallmark_gene_sets = hallmark_gene_sets_list if hallmark_gene_sets_list else hallmark_gene_sets_file
-
         # run gseapy, returns a prerank object
         pre_res = gp.prerank(rnk=rnk, gene_sets=hallmark_gene_sets, 
                     #  processes=4,
@@ -190,21 +189,26 @@ def gsea(
     elif type == 'fgsea':
         # run fgsea
         print("fgsea")
+
+        # TODO: decide how to set rscript_path
+        rscript_path =  "C:/Program Files/R/R-4.1.2/bin/Rscript"
+        
+        # create the arguments
+        args = [input_gene_ranking_file]
         
         if hallmark_gene_sets_file is not None:
-            # input is .gmt file
-            # have to use gage read list...so we need to pass in the filename
-            # execute r function will need to pass in provided arguments??
-            # or do we prep known files???
-
-            # for now just use "expected file names to load in" and prep inputs here
-
-            print("x")
-
+            args += ['-file']
         else:
-            # input is list of pathways
-            print("x")
+            args += ['-list']
         
+        args += [hallmark_gene_sets]
+
+        # execute R script
+        sce.tl.execute_r_script(rscript_path, './_images/fgsea.R', args)
+
+        # TODO
+        # read in intermediate file, process, and delete intermediate file
+
     else:
         raise ValueError(
             'Please select either "fgsea" or "gseapy" (default).'
