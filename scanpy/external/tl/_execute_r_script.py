@@ -5,12 +5,18 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import subprocess, os
 
+import os
+
+# idea, just be able to write 'Rscript' as the rscript_path in subprocess call...
+# os.environ['R_HOME'] = 'C:/Program Files/R/R-4.1.2/bin' # or '/Library/Frameworks/R.framework/Versions/3.6/Resources/'
+# os.environ['R_USER'] = 'C:/Program Files/R/R-4.1.2/bin' # or '/Library/Frameworks/R.framework/Versions/3.6/Resources/'
+
 HERE = Path(__file__).parent 
 
 def execute_r_script (
-    rscript_path: str,
-    arguments: Optional['list'] = None,
+    rscript_path: str = None,
     r_filename: str = 'test.R',
+    arguments: Optional[list] = None,
 ):
     """\
     
@@ -39,14 +45,21 @@ def execute_r_script (
     >>> is_success = scanpy.external.tl.execute_r_script('test.R')
  
     """
- 
-    path2rscript = Path(HERE, r_filename)
-    # command = "/Library/Frameworks/R.framework/Versions/3.6/Resources/Rscript"
-    # command = rscript_path
-    arg = '--vanilla'
 
-    # add optional arguments for the R script
-    if arguments is not None:
-        arguments += [arg]
-        arg = " ".join(arguments)
-    subprocess.call ([rscript_path, arg, path2rscript])
+    if rscript_path is None:
+        raise ValueError('Please provide the local path to your Rscript.exe executable')
+
+    try:
+        path2rscript = Path(HERE, r_filename)
+        arg = '--vanilla'
+
+        # add optional arguments for the R script
+        if arguments is not None:
+            arguments += [arg]
+            arg = " ".join(arguments)
+        
+        subprocess.call([rscript_path, arg, path2rscript], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+        return True
+
+    except:
+        return False

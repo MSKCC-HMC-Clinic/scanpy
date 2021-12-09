@@ -11,6 +11,15 @@ def test_gsea_barplot():
     """
     Test that gsea_barplot works
     """
-    gseapy_df = pd.read_csv('.\_data\gseapy_sample_df.csv')
-    sce.tl.gsea_barplot(gseapy_df, score = 'nes', color = ['b','r'], out_dir = '/_images/test_gsea_barplot.png')
-    assert compare_images('.\_images\test_gsea_barplot.png', '.\_images\master_gsea_barplot.png', tol=5) is None
+    gseapy_df = pd.read_csv('.\_data\master_gseapy_df.csv')
+    sce.tl.gsea_barplot(gseapy_df, score = 'nes', color = ['b','r'], out_dir = '_images/test_gsea_barplot.png')
+    assert compare_images('_images/test_gsea_barplot.png', '_images/master_gsea_barplot.png', tol=5) is None
+
+def test_gseapy():
+    """
+    Test that gseapy module option for gsea() works
+    """
+    sce.tl.gsea('.\_data\gsea_data.gsea_data.rnk', hallmark_gene_sets_list='KEGG_2016', type='gseapy', out_dir='_data/test_gseapy_df.csv')
+    master_gseapy_sample_df = pd.read_csv('_data/master_gseapy_df.csv')
+    test_gseapy_sample_df = pd.read_csv('_data/test_gseapy_df.csv')
+    assert test_gseapy_sample_df.equals(master_gseapy_sample_df)

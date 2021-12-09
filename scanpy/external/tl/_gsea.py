@@ -114,7 +114,8 @@ def gsea(
     hallmark_gene_sets_file: Optional['str'] = None,
     hallmark_gene_sets_list: Optional[list] = None,
     type: str = 'gseapy',
-    out_dir: Optional['str'] = "gsea_data.csv"
+    out_dir: Optional['str'] = None,
+    rscript_path: Optional['str'] = None,
 ):
   
     """\
@@ -130,8 +131,9 @@ def gsea(
     type
         Type of GSEA: “gseapy” (default) or “fgsea”
     out_dir
-        Name of output file, saved as .csv
-
+        Optional name of output file, if a string is provided it will be saved as .csv
+    rscript_path
+        Required for fgsea
    
     Returns
     -------
@@ -174,15 +176,13 @@ def gsea(
         # both .gmt or list of pathways accepted for hallmark_gene_sets
         # run gseapy, returns a prerank object
         pre_res = gp.prerank(rnk=rnk, gene_sets=hallmark_gene_sets, 
-                    #  processes=4,
-                    #  permutation_num=100, # reduce number to speed up testing
-                    #  outdir='test/prerank_report_kegg', # don't need to output intermediate files
-                    #  format='png',
+                    no_plot=True,
                     seed=0)
         
         gseapy_df = pre_res.res2d
 
-        gseapy_df.to_csv(out_dir, index=False)
+        if out_dir is not None:
+            gseapy_df.to_csv(out_dir, index=True)
 
         return gseapy_df
         
@@ -190,9 +190,6 @@ def gsea(
         # run fgsea
         print("fgsea")
 
-        # TODO: decide how to set rscript_path
-        rscript_path =  "C:/Program Files/R/R-4.1.2/bin/Rscript"
-        
         # create the arguments
         args = [input_gene_ranking_file]
         
@@ -204,6 +201,7 @@ def gsea(
         args += [hallmark_gene_sets]
 
         # execute R script
+        # handles missing rscript_path error
         sce.tl.execute_r_script(rscript_path, './_images/fgsea.R', args)
 
         # TODO
