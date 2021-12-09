@@ -23,3 +23,10 @@ def test_gseapy():
     master_gseapy_sample_df = pd.read_csv('_data/master_gseapy_df.csv')
     test_gseapy_sample_df = pd.read_csv('_data/test_gseapy_df.csv')
     assert test_gseapy_sample_df.equals(master_gseapy_sample_df)
+
+def test_fgsea(rscript_path):
+    """
+    Test that fgsea module option for gsea() works
+    """
+    sce.tl.gsea('.\_data\gsea_data.gsea_data.rnk', hallmark_gene_sets_list='KEGG_2016', type='fgsea', out_dir='_data/test_fgsea_df.csv', rscript_path=rscript_path)
+

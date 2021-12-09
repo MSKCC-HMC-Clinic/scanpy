@@ -171,9 +171,7 @@ def gsea(
         raise ValueError(
             'You can\'t specify both a hallmark_gene_sets_file, hallmark_gene_sets_list. ' 'Please select only one.'
         )
-    
-    hallmark_gene_sets = hallmark_gene_sets_list if hallmark_gene_sets_list else hallmark_gene_sets_file
-    
+        
     if type == 'gseapy':
 
         import gseapy as gp
@@ -182,6 +180,8 @@ def gsea(
         rnk = pd.read_csv(input_gene_ranking_file, header=None, sep="\t")
 
         # both .gmt or list of pathways accepted for hallmark_gene_sets
+        hallmark_gene_sets = hallmark_gene_sets_list if hallmark_gene_sets_list else hallmark_gene_sets_file
+
         # run gseapy, returns a prerank object
         pre_res = gp.prerank(rnk=rnk, gene_sets=hallmark_gene_sets, 
                     no_plot=True,
@@ -202,15 +202,15 @@ def gsea(
         args = [input_gene_ranking_file]
         
         if hallmark_gene_sets_file is not None:
-            args += ['-file']
+            args += ['--file', hallmark_gene_sets_file]
         else:
-            args += ['-list']
+            # modify the list to be read in as r input
+            # r_list = ",".join(hallmark_gene_sets_list)
+            args += ['--list', hallmark_gene_sets_list]
         
-        args += [hallmark_gene_sets]
-
         # execute R script
         # handles missing rscript_path error
-        sce.tl.execute_r_script(rscript_path, './_images/fgsea.R', args)
+        sce.tl.execute_r_script(rscript_path, './_scripts/fgsea.R', args, verbosity=True)
 
         # TODO
         # read in intermediate file, process, and delete intermediate file

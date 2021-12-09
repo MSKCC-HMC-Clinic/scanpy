@@ -15,10 +15,13 @@ HERE = Path(__file__).parent
 
 def execute_r_script (
     rscript_path: str = None,
-    r_filename: str = 'test.R',
+    r_filename: str = None,
     arguments: Optional[list] = None,
+    verbosity: Optional[bool] = False,
 ):
     """\
+    
+    Helper function that runs given R file in terminal using python subprocess module with the Rscript command
     
     Parameters
     ----------
@@ -28,6 +31,11 @@ def execute_r_script (
         Filename of R script to run
     arguments
         optional list of arguments to add to command
+    verbosity
+        Option to write subprocess output to terminal. Default false, which sets
+        stdout and stderr to NULL
+    cache @ TODO
+        Option to save intermediate R files. Default false.
    
     Returns
     -------
@@ -48,18 +56,29 @@ def execute_r_script (
 
     if rscript_path is None:
         raise ValueError('Please provide the local path to your Rscript.exe executable')
+    if r_filename is None:
+        raise ValueError('Please provide the filename of your R script')
 
     try:
         path2rscript = Path(HERE, r_filename)
-        arg = '--vanilla'
+
+        command = [rscript_path, path2rscript, '--vanilla']
 
         # add optional arguments for the R script
         if arguments is not None:
-            arguments += [arg]
-            arg = " ".join(arguments)
+            command += arguments
         
-        subprocess.call([rscript_path, arg, path2rscript], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
-        return True
+        print(command)
+
+        if verbosity == False: 
+            exit_code = subprocess.call(command, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+        else:
+            exit_code = subprocess.call(command)
+
+        if exit_code == 0:
+            return True
+        else:
+            return False
 
     except:
         return False
