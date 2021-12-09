@@ -119,6 +119,14 @@ def gsea(
 ):
   
     """\
+    
+    Python interface for 2 preranked GSEA functions: gseapy (Fang, 2020) and fgsea (Korotkevich et al., 2019).
+    Users provide a set of genes to be considered, a set of enrichment terms 
+    (hallmark gene sets that are a defined library or set of pathways), 
+    and select either gseapy (default) or fgsea. 
+    The set of genes may be optionally pre-ranked with user-defined weights. 
+    The output is a table of results for each enrichment term. 
+    
     Parameters
     ----------
     input_gene_ranking_file
