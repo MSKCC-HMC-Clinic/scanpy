@@ -116,6 +116,8 @@ def gsea(
     type: str = 'gseapy',
     out_dir: Optional['str'] = None,
     rscript_path: Optional['str'] = None,
+    verbosity: Optional[bool] = False,
+
 ):
   
     """\
@@ -142,6 +144,8 @@ def gsea(
         Optional name of output file, if a string is provided it will be saved as .csv
     rscript_path
         Required for fgsea
+    verbosity
+        Passed in to execute_r_script. Default false
    
     Returns
     -------
@@ -210,7 +214,7 @@ def gsea(
         
         # execute R script
         # handles missing rscript_path error
-        sce.tl.execute_r_script(rscript_path, './_scripts/fgsea.R', args, verbosity=True)
+        sce.tl.execute_r_script(rscript_path, './_scripts/fgsea.R', args, verbosity=verbosity)
 
         # TODO
         # read in intermediate file, process, and delete intermediate file

@@ -30,34 +30,48 @@ if (length(args)!=4) {
 
 # args[1]: --vanilla
 
+# current error: stats should be named
 # args[2] is always .rnk or .csv preranked gene list
 filename = args[2]
 ranks = read.csv(file=filename, header=FALSE)
+data(ranks)
+# ranks = ranks0$x
+# names(ranks) = ranks0$X
+
 
 hallmark_gene_type = args[3]
 if (hallmark_gene_type == '--file') {
-# if args[3] == '-file'
+# if args[3] == '--file'
 # then args[4] is .gmt file
 # use gage to read in .gmt files
 # have to use gage read list...so we need to pass in the filename
   print('file')
+  hallmark_gene_set = args[4]
+  gset = gage::readList(hallmark_gene_set)
+
 } else if (hallmark_gene_type == '--list') {
+# else if args[3] == '--list'
+
   print('list')
-# else if args[3] == '-list'
 # then args[4] is list
 # input is just a list and can be directly read in and provided?
+
+  string_list = args[4]
+  gset = as.list(strsplit(string_list, ",")[[1]])
 
 } else {
   stop('Missing argument: no hallmark gene set provided', call.=FALSE)
 }
 
-# example data: idea: could be when args == 0...
-data(examplePathways)
-data(exampleRanks)
+print("gset")
+print(gset)
+# # example data: idea: could be when args == 0...
+# data(examplePathways)
+# data(exampleRanks)
 
 set.seed(42)
-fgseaRes <- fgsea(pathways = examplePathways, 
-                  stats    = exampleRanks,
+fgseaRes <- fgsea(pathways = gset, 
+                  stats    = ranks,
                   minSize  = 15,
                   maxSize  = 500,
                   eps = 0.0)
