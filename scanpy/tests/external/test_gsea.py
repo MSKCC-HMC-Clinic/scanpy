@@ -5,7 +5,7 @@ import pandas as pd
 import scanpy.external as sce
 from matplotlib.testing.compare import compare_images
 
-# pytest.importorskip("gsea")
+pytest.importorskip("gsea")
 
 def test_gsea_barplot():
     """
