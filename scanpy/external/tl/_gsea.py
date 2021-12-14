@@ -168,7 +168,7 @@ def gsea(
 
     Example
     -------
-    >>> gsea_df = scanpy.external.tl.gsea('rank.rnk', 'genes.gmt', 'fgsea')
+    >>> gsea_df = scanpy.external.tl.gsea('rank.rnk', 'genes.gmt', 'gseapy')
 
     """
     if hallmark_gene_sets_file is not None and hallmark_gene_sets_list is not None:
