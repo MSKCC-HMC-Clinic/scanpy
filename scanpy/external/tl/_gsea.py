@@ -21,7 +21,7 @@ def gsea_barplot(
     """\
     Horizontal barplot of GSEA results of genes by enrichment terms given a dataframe
     Allows visualizations of either pval, nes, and fdr from outputs using either gseapy or fgsea.
-    Dataframe likely generated from scanpy.external.tl.gsea() function.
+    Dataframe generated from scanpy.external.tl.gsea() function.
 
     Parameters
     ----------
@@ -34,7 +34,8 @@ def gsea_barplot(
         fgsea supports: 'es', 'nes', 'pval', 'padj', 'log2error'
     score_cutoff
         Cutoff for displayed values.
-        Example usage: for pval < 0.05
+        Example usage: when displaying p-values (using score='pval'), the user
+        can define a cutoff for significance, such as pval < 0.05
     top_term
         Cutoff for displayed number of enrichment terms (bars)
     figsize
@@ -47,6 +48,9 @@ def gsea_barplot(
         User defined y_label
     out_file
         Name of output plot image (include ".png" extension).
+    color
+        Either string or list of colors when mapping positive and negative colors
+        Default color is matplotlib default: https://matplotlib.org/stable/users/dflt_style_changes.html#id1
 
     Returns
     -------
@@ -58,7 +62,6 @@ def gsea_barplot(
     Is designed to take in output df from scanpy.external.tl.gsea() function.
     The score supported is dependent on the type of gsea previously run,
     either 'gseapy' or 'fgsea'
-    Default color is matplotlib default: https://matplotlib.org/stable/users/dflt_style_changes.html#id1
 
     Example
     -------
