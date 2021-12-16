@@ -211,12 +211,12 @@ def gsea(
 
         gseapy_df = pre_res.res2d
 
-        if out_dir is not None:
-            gseapy_df.to_csv(out_dir, index=True)
-
         # add fgsea columns to gseapy to outputs of both functions are equal
         gseapy_df['padj'] = np.NaN
         gseapy_df['log2error'] = np.NaN
+
+        if out_dir is not None:
+            gseapy_df.to_csv(out_dir, index=True)
 
         return gseapy_df
 
