@@ -31,7 +31,7 @@ def gsea_barplot(
         Chosen score to display. Default is 'nes'
         Must be exact name of column as it appears in dataframe.
         gseapy supports: 'es', 'nes', 'pval', 'fdr'
-        fgsea supports: 'es', 'nes', 'pval', 'padj', 'log2error'
+        fgsea supports: 'es', 'nes', 'pval', 'padj', 'log2err'
     score_cutoff
         Cutoff for displayed values.
         Example usage: when displaying p-values (using score='pval'), the user
@@ -150,7 +150,8 @@ def gsea(
         Required for fgsea
     verbosity
         Passed in to execute_r_script. Default false
-
+    @TODO Remove intermediate fgsea files
+['es', 'nes', 'pval', 'padj', 'log2err', 'fdr', 'geneset_size', 'matched_size', 'genes', 'ledge_genes']]
     Returns
     -------
     Pandas dataframe of GSEA results with the following columns:
@@ -158,12 +159,12 @@ def gsea(
         nes: normalized enrichment score,
         pval: p-value,
         padj: BH adjusted p-value (fgsea specific),
-        log2error: expected error p-value logarithm standard deviation (fgsea specific),
+        log2err: expected error p-value logarithm standard deviation (fgsea specific),
         fdr: false discovery rate, (gseapy specific)
-        size: gene set size,
+        geneset_size: size of gene set, (gseapy specific)
         matched_size: genes matched to the data,
-        genes: gene names from the data set
-        ledge_genes: leading edge genes,
+        genes: gene names from the data set, (gseapy specific)
+        ledge_genes: leading edge genes
         }
 
     Notes
@@ -173,8 +174,8 @@ def gsea(
     Resulting table has columns of both gseapy and fgsea results, but may be NaN
     based on the type of GSEA chosen
 
-    gseapy specific columns: 'fdr' (false discovery rate)
-    fgsea specific columns: 'padj' (adjusted p-value), 'log2error'
+    gseapy specific columns: 'fdr' (false discovery rate), 'geneset_size', 'genes'
+    fgsea specific columns: 'padj' (adjusted p-value), 'log2err'
 
     For both fgsea and gseapy, the bounds for the minimum and maximum number
     of genes that are also in the gene set are as follows
@@ -211,9 +212,12 @@ def gsea(
 
         gseapy_df = pre_res.res2d
 
-        # add fgsea columns to gseapy to outputs of both functions are equal
+        # add fgsea columns to gseapy so outputs of both functions are equal
         gseapy_df['padj'] = np.NaN
-        gseapy_df['log2error'] = np.NaN
+        gseapy_df['log2err'] = np.NaN
+
+        # change order of columns
+        gseapy_df = gseapy_df[['es', 'nes', 'pval', 'padj', 'log2err', 'fdr', 'geneset_size', 'matched_size', 'genes', 'ledge_genes']]
 
         if out_dir is not None:
             gseapy_df.to_csv(out_dir, index=True)
@@ -221,25 +225,49 @@ def gsea(
         return gseapy_df
 
     elif type == 'fgsea':
+        # TODO: get hallmark_gene_sets_list to work
         # run fgsea
-        print("fgsea")
-
         # create the arguments
         args = [input_gene_ranking_file]
 
         if hallmark_gene_sets_file is not None:
             args += ['--file', hallmark_gene_sets_file]
         else:
+
+            raise ValueError(
+                'List input is not supported for fgsea at this time. Please provide a .gmt filepath under the hallmark_gene_sets_file parameter'
+            ) 
+            # TODO
             # modify the list to be read in as r input
             # r_list = ",".join(hallmark_gene_sets_list)
-            args += ['--list', hallmark_gene_sets_list]
+            # args += ['--list', hallmark_gene_sets_list]
 
         # execute R script
         # handles missing rscript_path error
+        # TODO: handle storing/removing temporory r files in execute_r_script
         sce.tl.execute_r_script(rscript_path, './_scripts/fgsea.R', args, verbosity=verbosity)
 
-        # TODO
-        # read in intermediate file, process, and delete intermediate file
+        # for now, intermediate file stored in fgseaRes.csv
+        fgsea_df = pd.read_csv("fgseaRes.csv")
+
+        # rename columns based on gseapy format
+        fgsea_df = fgsea_df.rename(columns={'pathway':'Term', 'ES':'es', 'NES':'nes', 'leadingEdge': 'ledge_genes','size':'matched_size'})
+        fgsea_df = fgsea_df.set_index('Term')
+        
+        # gsea uses ' ' while gseapy uses ';' as delimiter for ledge_genes, match gseapy format
+        fgsea_df = fgsea_df.replace(to_replace=r' ', value=';', regex=True)
+
+        # add gseapy columns to fgsea so outputs of both functions are equal
+        fgsea_df['fdr'] = np.NaN
+        fgsea_df['geneset_size'] = np.NaN
+        fgsea_df['genes'] = np.NaN
+
+        fgsea_df = fgsea_df[['es', 'nes', 'pval', 'padj', 'log2err', 'fdr', 'geneset_size', 'matched_size', 'genes', 'ledge_genes']]
+
+        if out_dir is not None:
+            fgsea_df.to_csv(out_dir, index=True)
+
+        return fgsea_df
 
     else:
         raise ValueError(

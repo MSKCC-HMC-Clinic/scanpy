@@ -1,6 +1,5 @@
 #!/usr/bin/env Rscript
 
-
 # https://stackoverflow.com/questions/750786/whats-the-best-way-to-use-r-scripts-on-the-command-line-terminal
 dir.create(Sys.getenv('R_LIBS_USER'), recursive = TRUE)  # create personal library
 .libPaths(Sys.getenv('R_LIBS_USER'))  # add to the path
@@ -13,7 +12,6 @@ install('gage')
 library(devtools)
 
 install_github('ctlab/fgsea')
-# install_github('datapplab/gage')
 
 library(fgsea)
 library(gage)
@@ -60,9 +58,7 @@ if (hallmark_gene_type == '--file') {
       gset = gage::readList(hallmark_gene_set)
   } else {
       stop('Error: hallmark gene set must be of type .gmt or list', call.=FALSE)
-
   }
-
 
 } else if (hallmark_gene_type == '--list') {
   # then args[4] is list
@@ -74,8 +70,6 @@ if (hallmark_gene_type == '--file') {
 } else {
   stop('Missing argument: no hallmark gene set provided', call.=FALSE)
 }
-
-
 # # example data: idea: could be when args == 0...
 # data(examplePathways)
 # data(exampleRanks)
@@ -86,7 +80,6 @@ fgseaRes <- fgsea(pathways = gset,
                   minSize  = 15,
                   maxSize  = 500,
                   eps = 0.0)
-
 
 # TODO: figure out where to write intermediate file
 # in some cached folder, following the scanpy cachedir settings
