@@ -153,7 +153,18 @@ def gsea(
 
     Returns
     -------
-    Pandas dataframe of GSEA results
+    Pandas dataframe of GSEA results with the following columns:
+        {es: enrichment score,
+        nes: normalized enrichment score,
+        pval: p-value,
+        padj: BH adjusted p-value (fgsea specific),
+        log2error: expected error p-value logarithm standard deviation (fgsea specific),
+        fdr: false discovery rate, (gseapy specific)
+        size: gene set size,
+        matched_size: genes matched to the data,
+        genes: gene names from the data set
+        ledge_genes: leading edge genes,
+        }
 
     Notes
     -------
@@ -202,6 +213,10 @@ def gsea(
 
         if out_dir is not None:
             gseapy_df.to_csv(out_dir, index=True)
+
+        # add fgsea columns to gseapy to outputs of both functions are equal
+        gseapy_df['padj'] = np.NaN
+        gseapy_df['log2error'] = np.NaN
 
         return gseapy_df
 
