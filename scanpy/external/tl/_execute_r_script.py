@@ -3,26 +3,20 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import subprocess, os
-
+import subprocess
 import os
 
-# idea, just be able to write 'Rscript' as the rscript_path in subprocess call...
-# os.environ['R_HOME'] = 'C:/Program Files/R/R-4.1.2/bin' # or '/Library/Frameworks/R.framework/Versions/3.6/Resources/'
-# os.environ['R_USER'] = 'C:/Program Files/R/R-4.1.2/bin' # or '/Library/Frameworks/R.framework/Versions/3.6/Resources/'
+HERE = Path(__file__).parent
 
-HERE = Path(__file__).parent 
 
-def execute_r_script (
+def execute_r_script(
     rscript_path: str = None,
     r_filename: str = None,
     arguments: Optional[list] = None,
     verbosity: Optional[bool] = False,
 ):
     """\
-    
     Helper function that runs given R file in terminal using python subprocess module with the Rscript command
-    
     Parameters
     ----------
     rscript_path
@@ -36,22 +30,17 @@ def execute_r_script (
         stdout and stderr to NULL
     cache @ TODO
         Option to save intermediate R files. Default false.
-   
     Returns
     -------
     Boolean of whether script ran successfully
-    
     Notes
     -------
-	This function requires the local path to the Rscript command to run the 
+    This function requires the local path to the Rscript command to run the
     provided script using the subprocess module
-
     This function will prompt the user in terminal for the Rscript command path
-
     Example
     -------
     >>> is_success = scanpy.external.tl.execute_r_script('test.R')
- 
     """
 
     if rscript_path is None:
@@ -67,10 +56,8 @@ def execute_r_script (
         # add optional arguments for the R script
         if arguments is not None:
             command += arguments
-        
-        print(command)
 
-        if verbosity == False: 
+        if not verbosity:
             exit_code = subprocess.call(command, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
         else:
             exit_code = subprocess.call(command)
@@ -80,5 +67,5 @@ def execute_r_script (
         else:
             return False
 
-    except:
+    except os.error:
         return False

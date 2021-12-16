@@ -70,28 +70,27 @@ def gsea_barplot(
 
     """
     try:
-        dd = df.sort_values(by=score)
         fig = plt.figure(figsize=figsize)
-        dd = df.sort_values(by=score).iloc[-top_term:,:]
+        df = df.sort_values(by=score).iloc[-top_term:,:]
 
         if score_cutoff:
-            dd = dd[dd[score] > score_cutoff]
+            df = df[df[score] > score_cutoff]
 
         ax = fig.add_subplot(111)
 
         # user defined colors for positive and negative values
         colors = color
-        if (dd[score] > 0).any() and (dd[score] < 0).any():
+        if (df[score] > 0).any() and (df[score] < 0).any():
             if len(color) == 2:
-                color_tmp = [''] * len(dd[score])
-            for i, s in enumerate(dd[score]):
+                color_tmp = [''] * len(df[score])
+            for i, s in enumerate(df[score]):
                 if s >= 0:
                     color_tmp[i] = color[0]
                 else:
                     color_tmp[i] = color[1]
             colors = color_tmp
 
-        bar = dd.plot.barh(
+        bar = df.plot.barh(
             y=score,
             alpha=0.75,
             color=colors,
