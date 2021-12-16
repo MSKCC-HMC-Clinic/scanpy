@@ -30,7 +30,7 @@ def test_gseapy():
 def test_fgsea(rscript_path):
     """
     Test that fgsea module option for gsea() works
-    #TODO hallmark_gene_sets_list parameter not supported, only hallmark_gene_sets_file supported
+    # TODO hallmark_gene_sets_list parameter not supported, only hallmark_gene_sets_file supported
     """
     sce.tl.gsea('./_data/gsea_data.gsea_data.rnk', hallmark_gene_sets_file='./_data/h.all.v7.4.symbols.gmt', type='fgsea', out_dir='_data/test_fgsea_df.csv', rscript_path=rscript_path)
     master_fgsea_sample_df = pd.read_csv('_data/master_fgsea_df.csv')

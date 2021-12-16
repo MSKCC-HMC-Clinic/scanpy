@@ -236,7 +236,8 @@ def gsea(
 
             raise ValueError(
                 'List input is not supported for fgsea at this time. Please provide a .gmt filepath under the hallmark_gene_sets_file parameter'
-            ) 
+            )
+
             # TODO
             # modify the list to be read in as r input
             # r_list = ",".join(hallmark_gene_sets_list)
@@ -253,7 +254,7 @@ def gsea(
         # rename columns based on gseapy format
         fgsea_df = fgsea_df.rename(columns={'pathway':'Term', 'ES':'es', 'NES':'nes', 'leadingEdge': 'ledge_genes','size':'matched_size'})
         fgsea_df = fgsea_df.set_index('Term')
-        
+
         # gsea uses ' ' while gseapy uses ';' as delimiter for ledge_genes, match gseapy format
         fgsea_df = fgsea_df.replace(to_replace=r' ', value=';', regex=True)
 
