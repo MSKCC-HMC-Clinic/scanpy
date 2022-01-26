@@ -46,9 +46,13 @@ def execute_r_script(
 
     Example
     -------
-    >>> is_success = scanpy.external.tl.execute_r_script('test.R')
+    >>> is_success = scanpy.external.tl.execute_r_script('PATH_TO_Rscript.exe', test.R')
 
     """
+    ####  Just to print run time ####
+    import time
+    start_time = time.time()
+    ####  Just to print run time ####
 
     if rscript_path is None:
         raise ValueError('Please provide the local path to your Rscript.exe executable')
@@ -56,9 +60,16 @@ def execute_r_script(
         raise ValueError('Please provide the filename of your R script')
 
     try:
-        path2rscript = Path(HERE, r_filename)
 
-        command = [rscript_path, path2rscript, '--vanilla']
+        # create temp directory for r script files
+        temp_dir = Path(HERE, '_tmp')
+        if not os.path.exists(temp_dir):
+            os.mkdir(temp_dir)  
+        print('temp_dir in python:', temp_dir)
+
+        path2rscript = Path(HERE, '_scripts', r_filename)
+
+        command = [rscript_path, path2rscript, '--vanilla', temp_dir]
 
         # add optional arguments for the R script
         if arguments is not None:
@@ -69,6 +80,14 @@ def execute_r_script(
         else:
             exit_code = subprocess.call(command)
 
+        file_size = os.path.getsize(Path(temp_dir, 'fgseaRes.csv'))
+        print("File Size is :", file_size, "bytes")
+
+
+        ####  Just to print run time ####
+        print("Runtime: --- %s seconds ---" % (time.time() - start_time))
+        ####  Just to print run time ####
+
         if exit_code == 0:
             return True
         else:
@@ -76,3 +95,7 @@ def execute_r_script(
 
     except os.error:
         return False
+
+
+def remove_temp():
+    

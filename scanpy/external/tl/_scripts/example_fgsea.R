@@ -16,8 +16,18 @@ library(ggplot2)
 data(examplePathways)
 data(exampleRanks)
 set.seed(42)
+
+# test taking in and reading different argument types
+args = commandArgs(trailingOnly=TRUE)
+print(args)
+
 fgseaRes <- fgsea(pathways = examplePathways, 
                   stats    = exampleRanks,
                   minSize  = 15,
                   maxSize  = 500)
-fwrite(fgseaRes, file ="scanpy/external/tl/fgseaRes.csv", sep=",", sep2=c("", " ", ""))
+
+args2 = args[2] # temp dir
+write_path = paste0(args2,"/fgseaRes.csv")
+print(write_path)
+fwrite(fgseaRes, write_path, sep=",", sep2=c("", " ", ""))
+
