@@ -251,6 +251,8 @@ def gsea(
         # for now, intermediate file stored in fgseaRes.csv
         fgsea_df = pd.read_csv("fgseaRes.csv")
 
+        # TODO: remove temp directory containing Rscript generated intermediate files
+
         # rename columns based on gseapy format
         fgsea_df = fgsea_df.rename(columns={'pathway':'Term', 'ES':'es', 'NES':'nes', 'leadingEdge': 'ledge_genes','size':'matched_size'})
         fgsea_df = fgsea_df.set_index('Term')
