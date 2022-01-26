@@ -8,10 +8,8 @@ import scanpy as sc
 import scanpy.external as sce
 
 # Import neighbor testing functionality
-#from scanpy.tests.test_neighbors import get_neighbors
 from scanpy import Neighbors
 from scanpy.external.pp import nearest_neighbors_formatted
-#from scanpy.external.pp import nn_formatted
 
 #pytest.importorskip("nn_formatted")
 
