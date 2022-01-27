@@ -19,7 +19,6 @@ set.seed(42)
 
 # test taking in and reading different argument types
 args = commandArgs(trailingOnly=TRUE)
-print(args)
 
 fgseaRes <- fgsea(pathways = examplePathways, 
                   stats    = exampleRanks,
@@ -28,6 +27,5 @@ fgseaRes <- fgsea(pathways = examplePathways,
 
 args2 = args[2] # temp dir
 write_path = paste0(args2,"/fgseaRes.csv")
-print(write_path)
 fwrite(fgseaRes, write_path, sep=",", sep2=c("", " ", ""))
 

@@ -6,4 +6,4 @@ from ._trimap import trimap
 from ._harmony_timeseries import harmony_timeseries
 from ._sam import sam
 from ._wishbone import wishbone
-from ._execute_r_script import execute_r_script
+from ._execute_r_script import execute_r_script, remove_temp

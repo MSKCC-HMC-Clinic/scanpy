@@ -64,7 +64,7 @@ def execute_r_script(
         # create temp directory for r script files
         temp_dir = Path(HERE, '_tmp')
         if not os.path.exists(temp_dir):
-            os.mkdir(temp_dir)  
+            os.mkdir(temp_dir)
         print('temp_dir in python:', temp_dir)
 
         path2rscript = Path(HERE, '_scripts', r_filename)
@@ -83,7 +83,6 @@ def execute_r_script(
         file_size = os.path.getsize(Path(temp_dir, 'fgseaRes.csv'))
         print("File Size is :", file_size, "bytes")
 
-
         ####  Just to print run time ####
         print("Runtime: --- %s seconds ---" % (time.time() - start_time))
         ####  Just to print run time ####
@@ -98,4 +97,25 @@ def execute_r_script(
 
 
 def remove_temp():
-    
+
+    """\
+
+    Helper function that recursively removes the _tmp directory and all files in it
+
+    Notes
+    -------
+    This function would be called in a python script after processing any files generated
+    from the execute_r_script call
+
+    Example
+    -------
+    # assume running 'test.R' generates a 'test.csv' file in the _temp directory
+    >>> is_success = scanpy.external.tl.execute_r_script('PATH_TO_Rscript.exe', 'test.R')
+    # process 'test.csv'
+    >>> test_csv = pd.read_csv('test.csv')
+    # remove _temp directory and its contents
+    >>> remove_tmp()
+    """
+    temp_dir = Path(HERE, '_tmp')
+    if os.path.exists(temp_dir):
+        os.removedirs(temp_dir)
