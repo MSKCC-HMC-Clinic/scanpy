@@ -11,7 +11,7 @@ import scanpy.external as sce
 from scanpy import Neighbors
 from scanpy.external.pp import nearest_neighbors_formatted
 
-#pytest.importorskip("nn_formatted")
+# pytest.importorskip("nn_formatted")
 
 # the input data
 X = [[1, 0], [3, 0], [5, 6], [0, 4]]
@@ -22,9 +22,9 @@ adata = AnnData(np.array(X))
 
 # distances
 distances_euclidean = [
-    [0.0,  2.0, 4.123105525970459],
+    [0.0, 2.0, 4.123105525970459],
     [0.0, 2.0, 5.0],
-    [0.0,  5.385164737701416, 6.324555397033691],
+    [0.0, 5.385164737701416, 6.324555397033691],
     [0.0, 4.123105525970459, 5.0],
 ]
 
@@ -47,4 +47,3 @@ def test_nn_formatted():
 
     assert np.allclose(k_nearest_dists, np.array(distances_euclidean))
     assert np.allclose(k_nearest, np.array(nearest_cells))
-
