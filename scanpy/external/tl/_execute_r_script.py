@@ -26,12 +26,11 @@ def execute_r_script(
     r_filename
         Filename of R script to run
     arguments
-        optional list of arguments to add to command
+        optional list of arguments to add to command, such as input filenames specific
+        to the r_filename.R script
     verbosity
         Option to write subprocess output to terminal. Default false, which sets
         stdout and stderr to NULL
-    cache @ TODO
-        Option to save intermediate R files. Default false.
 
     Returns
     -------
@@ -42,11 +41,16 @@ def execute_r_script(
     This function requires the local path to the Rscript command to run the
     provided script using the subprocess module
 
-    This function will prompt the user in terminal for the Rscript command path
+    Any files created by running the r_filename.R script will be saved in a
+    /_temp directory. Any external function that calls execute_r_script will be
+    responsible for removing this _tmp directory and its files
+
+    The r_filename.R script provided as a parameter must be contained in the
+    scanpy/external/tl/_scripts directory
 
     Example
     -------
-    >>> is_success = scanpy.external.tl.execute_r_script('PATH_TO_Rscript.exe', test.R')
+    >>> is_success = scanpy.external.tl.execute_r_script('PATH_TO_Rscript.exe', 'test.R')
 
     """
     ####  Just to print run time ####
@@ -65,13 +69,12 @@ def execute_r_script(
         temp_dir = Path(HERE, '_tmp')
         if not os.path.exists(temp_dir):
             os.mkdir(temp_dir)
-        print('temp_dir in python:', temp_dir)
 
         path2rscript = Path(HERE, '_scripts', r_filename)
 
         command = [rscript_path, path2rscript, '--vanilla', temp_dir]
 
-        # add optional arguments for the R script
+        # add optional arguments that are specific to the r_filename.R script
         if arguments is not None:
             command += arguments
 
