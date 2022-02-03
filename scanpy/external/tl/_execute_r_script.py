@@ -55,10 +55,6 @@ def execute_r_script(
     >>> is_success = scanpy.external.tl.execute_r_script('PATH_TO_Rscript.exe', 'test.R')
 
     """
-    ####  Just to print run time ####
-    import time
-    start_time = time.time()
-    ####  Just to print run time ####
 
     if rscript_path is None:
         raise ValueError('Please provide the local path to your Rscript.exe executable')
@@ -84,13 +80,6 @@ def execute_r_script(
             exit_code = subprocess.call(command, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
         else:
             exit_code = subprocess.call(command)
-
-        file_size = os.path.getsize(Path(temp_dir, 'fgseaRes.csv'))
-        print("File Size is :", file_size, "bytes")
-
-        ####  Just to print run time ####
-        print("Runtime: --- %s seconds ---" % (time.time() - start_time))
-        ####  Just to print run time ####
 
         if exit_code == 0:
             return True
