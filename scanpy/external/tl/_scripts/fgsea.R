@@ -22,24 +22,28 @@ library(tools)
 args = commandArgs(trailingOnly=TRUE)
 
 # test if there is 4 arguments: if not, return an error
+# args[1]: --vanilla
+# args[2]: temp_dir_path
+# args[3]: input_gene_ranking_file
+# args[4]: hallmark_gene_sets_file
 if (length(args)!=4) {
   stop('Missing arguments', call.=FALSE)
 }
 
-# args[1]: --vanilla
+temp_dir_path = args[2]
+gene_ranking_filename = args[3]
+hallmark_gene_filename = args[4]
 
-# args[2] is always .rnk or .csv preranked gene list
-filename = args[2]
+# process gene ranking file
+gene_ranking_file_type = file_ext(gene_ranking_filename)
 
-file_type = file_ext(filename)
-
-if (file_type == 'rnk') {
+if (gene_ranking_file_type == 'rnk') {
     # .rnk files are tab deliminated
     ranked_genes0 = read.table(
-    filename,
+    gene_ranking_filename,
     sep="\t")
-} else if (file_type == 'csv') {
-    ranked_genes0 = read.csv(filename)
+} else if (gene_ranking_file_type == 'csv') {
+    ranked_genes0 = read.csv(gene_ranking_filename)
 } else {
     stop('Missing argument: no preranked gene set provided', call.=FALSE)
 }
@@ -47,32 +51,15 @@ if (file_type == 'rnk') {
 ranked_genes = ranked_genes0[,2]
 names(ranked_genes) = ranked_genes0[,1]
 
-hallmark_gene_type = args[3]
-if (hallmark_gene_type == '--file') {
-  # then args[4] is .gmt file
-  # use gage to read in .gmt files
-  # have to use gage read list...so we need to pass in the filename
-  hallmark_gene_set = args[4]
-  gset_file_type = file_ext(hallmark_gene_set)
-  if (gset_file_type == 'gmt') {
-      gset = gage::readList(hallmark_gene_set)
-  } else {
-      stop('Error: hallmark gene set must be of type .gmt or list', call.=FALSE)
-  }
+# process hallmark gene file
+hallmark_gene_file_type = file_ext(hallmark_gene_filename)
 
-} else if (hallmark_gene_type == '--list') {
-  # then args[4] is list
-  # input is just a list and can be directly read in and provided?
-
-  string_list = args[4]
-  gset = as.list(strsplit(string_list, ",")[[1]])
-
+if (hallmark_gene_file_type == 'gmt') {
+    gset = gage::readList(hallmark_gene_filename)
 } else {
-  stop('Missing argument: no hallmark gene set provided', call.=FALSE)
+    # TODO: take in csv
+    stop('Hallmark gene set must be of type .gmt', call.=FALSE)
 }
-# # example data: idea: could be when args == 0...
-# data(examplePathways)
-# data(exampleRanks)
 
 set.seed(42)
 fgseaRes <- fgsea(pathways = gset, 
@@ -81,6 +68,5 @@ fgseaRes <- fgsea(pathways = gset,
                   maxSize  = 500,
                   eps = 0.0)
 
-# TODO: figure out where to write intermediate file
-# in some cached folder, following the scanpy cachedir settings
-fwrite(fgseaRes, file ="fgseaRes.csv", sep=',', sep2=c('', ' ', ''))
+write_path = paste0(temp_dir_path,"/fgseaRes.csv")
+fwrite(fgseaRes, write_path, sep=",", sep2=c("", " ", ""))

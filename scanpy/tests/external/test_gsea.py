@@ -19,20 +19,24 @@ def test_gsea_barplot():
 
 def test_gseapy():
     """
-    Test that gseapy module option for gsea() works
+    Test that type = 'gseapy' option for gsea() works
     """
-    sce.tl.gsea('./_data/gsea_data.gsea_data.rnk', hallmark_gene_sets_list='KEGG_2016', type='gseapy', out_dir='_data/test_gseapy_df.csv')
+    # test .rnk and .gmt input
+    # KEGG_2016 is primary test example for gseapy: data from https://maayanlab.cloud/Enrichr/#libraries
+    sce.tl.gsea(input_gene_ranking_file='./_data/gsea_data.gsea_data.rnk', hallmark_gene_sets_file='./_data/KEGG_2016.gmt', type='gseapy', out_dir='_data/test_gseapy_df.csv')
     master_gseapy_sample_df = pd.read_csv('_data/master_gseapy_df.csv')
     test_gseapy_sample_df = pd.read_csv('_data/test_gseapy_df.csv')
     assert test_gseapy_sample_df.equals(master_gseapy_sample_df)
 
 
-def test_fgsea(rscript_path):
+def test_fgsea(
+    rscript_path=None
+):
     """
-    Test that fgsea module option for gsea() works
-    # TODO hallmark_gene_sets_list parameter not supported, only hallmark_gene_sets_file supported
+    Test that type = 'fgsea' module option for gsea() works
     """
-    sce.tl.gsea('./_data/gsea_data.gsea_data.rnk', hallmark_gene_sets_file='./_data/h.all.v7.4.symbols.gmt', type='fgsea', out_dir='_data/test_fgsea_df.csv', rscript_path=rscript_path)
+    # test .rnk and .gmt input
+    sce.tl.gsea(input_gene_ranking_file='./_data/gsea_data.gsea_data.rnk', hallmark_gene_sets_file='./_data/h.all.v7.4.symbols.gmt', type='fgsea', out_dir='_data/test_fgsea_df.csv', rscript_path=rscript_path)
     master_fgsea_sample_df = pd.read_csv('_data/master_fgsea_df.csv')
     test_fgsea_sample_df = pd.read_csv('_data/test_fgsea_df.csv')
     assert test_fgsea_sample_df.equals(master_fgsea_sample_df)
