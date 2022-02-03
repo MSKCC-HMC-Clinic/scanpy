@@ -5,6 +5,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import subprocess
 import os
+import shutil
+
 
 HERE = Path(__file__).parent
 
@@ -99,7 +101,7 @@ def execute_r_script(
         return False
 
 
-def remove_temp():
+def remove_temp_dir():
 
     """\
 
@@ -117,8 +119,34 @@ def remove_temp():
     # process 'test.csv'
     >>> test_csv = pd.read_csv('test.csv')
     # remove _temp directory and its contents
-    >>> remove_tmp()
+    >>> remove_tmp_dir()
     """
     temp_dir = Path(HERE, '_tmp')
-    if os.path.exists(temp_dir):
-        os.removedirs(temp_dir)
+    shutil.rmtree(temp_dir)
+
+
+def remove_temp_file(
+    filename: str = None
+):
+
+    """\
+
+    Helper function that removes a specified file from the _tmp directory
+
+    Notes
+    -------
+    This function would be called in a python script after processing any files generated
+    from the execute_r_script call
+
+    Example
+    -------
+    # assume running 'test.R' generates a 'test.csv' and 'test.txt' file in the _temp directory
+    >>> is_success = scanpy.external.tl.execute_r_script('PATH_TO_Rscript.exe', 'test.R')
+    # process 'test.csv'
+    >>> test_csv = pd.read_csv('test.csv')
+    # remove just the 'test.csv' file
+    >>> remove_temp_file('test.csv')
+    """
+    temp_file = Path(HERE, '_tmp', filename)
+    if os.path.exists(temp_file):
+        os.remove(temp_file)

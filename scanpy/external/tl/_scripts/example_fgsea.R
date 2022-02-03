@@ -17,7 +17,7 @@ data(examplePathways)
 data(exampleRanks)
 set.seed(42)
 
-# test taking in and reading different argument types
+# args[1] is '-vanilla', args[2] is 'temp_dir_path'
 args = commandArgs(trailingOnly=TRUE)
 
 fgseaRes <- fgsea(pathways = examplePathways, 
@@ -25,7 +25,6 @@ fgseaRes <- fgsea(pathways = examplePathways,
                   minSize  = 15,
                   maxSize  = 500)
 
-args2 = args[2] # temp dir
+args2 = args[2] # temp dir path
 write_path = paste0(args2,"/fgseaRes.csv")
 fwrite(fgseaRes, write_path, sep=",", sep2=c("", " ", ""))
-
