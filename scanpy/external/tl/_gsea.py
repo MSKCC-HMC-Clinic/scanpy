@@ -4,6 +4,9 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import scanpy.external as sce
+import os
+import shutil
+
 
 HERE = Path(__file__).parent
 
@@ -201,10 +204,13 @@ def gsea(
         raise ValueError(
                         'Only .gmt and .csv are supported for input hallmark gene sets file'
                     )
-            
+
     if type == 'gseapy':
 
-        import gseapy as gp
+        try:
+            import gseapy as gp
+        except ImportError:
+            raise ImportError('Please install GSEApy: `pip install gseapy`.')
 
         # read in preranked gene list, .rnk or .csv accepted
         rnk = pd.read_csv(input_gene_ranking_file, header=None, sep="\t")
@@ -213,7 +219,6 @@ def gsea(
         pre_res = gp.prerank(
             rnk=rnk,
             gene_sets=hallmark_gene_sets_file,
-            out_dir=None,
             no_plot=True,
             seed=0
         )
@@ -229,6 +234,10 @@ def gsea(
 
         if out_dir is not None:
             gseapy_df.to_csv(out_dir, index=True)
+
+        # gseapy_temp_dir = 'GSEA_Prerank'
+        # if os.path.exists(gseapy_temp_dir):
+        #     shutil.rmtree(gseapy_temp_dir)
 
         return gseapy_df
 
