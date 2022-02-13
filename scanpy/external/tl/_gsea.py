@@ -192,6 +192,8 @@ def gsea(
     Example
     -------
     >>> gsea_df = scanpy.external.tl.gsea('rank.rnk', 'genes.gmt', 'gseapy')
+    >>> fgsea_df = scanpy.external.tl.gsea(input_gene_ranking_file='./_data/gsea_data.gsea_data.rnk', hallmark_gene_sets_file='./_data/h.all.v7.4.symbols.gmt', type='fgsea', out_dir='_data/test_fgsea_df.csv', rscript_path=rscript_path)
+
 
     """
 
@@ -251,8 +253,9 @@ def gsea(
         fgseaRes_path = Path(HERE, '_tmp', 'fgseaRes.csv')
         fgsea_df = pd.read_csv(fgseaRes_path)
 
-        # remove temporary directory + file
-        sce.tl.remove_temp_dir()
+        # remove temporary directory + file unless cache==True
+        if not cache:
+            sce.tl.remove_temp_dir()
 
         # rename columns for shared output format
         fgsea_df = fgsea_df.rename(columns={'pathway':'Term', 'ES':'es', 'NES':'nes', 'leadingEdge': 'ledge_genes','size':'matched_size'})

@@ -50,7 +50,7 @@ def test_fgsea(
     if os.path.exists(test_file_path):
         os.remove(test_file_path)
     # test .rnk and .gmt input
-    sce.tl.gsea(input_gene_ranking_file='./_data/gsea_data.gsea_data.rnk', hallmark_gene_sets_file='./_data/h.all.v7.4.symbols.gmt', type='fgsea', out_dir='_data/test_fgsea_df.csv', rscript_path=rscript_path)
+    sce.tl.gsea(input_gene_ranking_file='./_data/gsea_data.gsea_data.rnk', hallmark_gene_sets_file='./_data/h.all.v7.4.symbols.gmt', type='fgsea', out_dir='_data/test_fgsea_df.csv', rscript_path=rscript_path, cache=True)
     master_fgsea_sample_df = pd.read_csv('_data/master_fgsea_df.csv')
     test_fgsea_sample_df = pd.read_csv('_data/test_fgsea_df.csv')
     assert test_fgsea_sample_df.equals(master_fgsea_sample_df)
