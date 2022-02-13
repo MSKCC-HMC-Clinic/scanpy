@@ -55,6 +55,7 @@ def execute_r_script(
     >>> is_success = scanpy.external.tl.execute_r_script('PATH_TO_Rscript.exe', 'test.R')
 
     """
+    print("HERE: ", HERE)
 
     if rscript_path is None:
         raise ValueError('Please provide the local path to your Rscript.exe executable')
@@ -64,11 +65,12 @@ def execute_r_script(
     try:
 
         # create temp directory for r script files
-        temp_dir = Path(HERE, '_tmp')
+        temp_dir = os.path.join(HERE,'_tmp')
         if not os.path.exists(temp_dir):
             os.mkdir(temp_dir)
 
-        path2rscript = Path(HERE, '_scripts', r_filename)
+        # path2rscript = Path(HERE, '_scripts', r_filename)
+        path2rscript = os.path.join(HERE,'_scripts', r_filename)
 
         command = [rscript_path, path2rscript, '--vanilla', temp_dir]
 
@@ -110,7 +112,7 @@ def remove_temp_dir():
     # remove _temp directory and its contents
     >>> remove_tmp_dir()
     """
-    temp_dir = Path(HERE, '_tmp')
+    temp_dir = os.path.join(HERE, '_tmp')
     shutil.rmtree(temp_dir)
 
 
@@ -136,6 +138,6 @@ def remove_temp_file(
     # remove just the 'test.csv' file
     >>> remove_temp_file('test.csv')
     """
-    temp_file = Path(HERE, '_tmp', filename)
+    temp_file = os.path.join(HERE, '_tmp', filename)
     if os.path.exists(temp_file):
         os.remove(temp_file)
