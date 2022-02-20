@@ -78,14 +78,14 @@ def rank_gene(
 
         # Construct the distance matrix
         print('Determing nearest neighbor graph using ' + metric + ' distance metric')
-        nbrs = NearestNeighbors(int(knn), metric,
-                                n_jobs).fit(pca_projections.values)
+        nbrs = NearestNeighbors(n_neighbors=int(knn), metric=metric,
+                                n_jobs=n_jobs).fit(pca_projections.values)
         kNN = nbrs.kneighbors_graph(pca_projections.values, mode='distance')
 
         # Adaptive k
         adaptive_k = int(np.floor(knn / 3))
-        nbrs = NearestNeighbors(int(adaptive_k),
-                                metric, n_jobs).fit(pca_projections.values)
+        nbrs = NearestNeighbors(n_neighbors=int(adaptive_k),
+                                metric=metric, n_jobs=n_jobs).fit(pca_projections.values)
         adaptive_std = nbrs.kneighbors_graph(
             pca_projections.values, mode='distance').max(axis=1)
         adaptive_std = np.ravel(adaptive_std.todense())
