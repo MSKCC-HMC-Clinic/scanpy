@@ -16,6 +16,7 @@ from anndata import AnnData
 from matplotlib.cm import get_cmap
 cols = get_cmap('tab20').colors
 
+
 def rank_gene(
     adata: AnnData,
     cell_group_by: str,
@@ -48,18 +49,18 @@ def rank_gene(
     n_jobs: int
         Number of cores to use in parallelizing NN calculation; default to -1 (all cores in use)
     zscore: boolean
-	    Boolean indicating whether to normalize using z-score
+        Boolean indicating whether to normalize using z-score
     self_autocorrelate: boolean
-	    Boolean indicating whether to include values of a cell to itself when calculating spatial autocorrelation; default true
+        Boolean indicating whether to include values of a cell to itself when calculating spatial autocorrelation; default true
     normalization_type: str
         TODO: test different normalization techniques on spatial autocorrelation output
 
     Returns
-    -------    
+    -------
     DataFrame of cell neighborhood types by factors
 
     Notes
-    -------   
+    -------
 
     Example
     -------
@@ -92,28 +93,28 @@ def rank_gene(
 
         # Find the distance similarity via kernel
 
-        # Kernel 
+        # Kernel
         print('Determing kernel')
-        N = pca_projections.shape[0] # number of dim we've reduced it down to
-        x, y, dists = find(kNN) # x - row indices, y - col indices, dists - non zero-values 
+        N = pca_projections.shape[0]  # number of dim we've reduced it down to
+        x, y, dists = find(kNN)  # x - row indices, y - col indices, dists - non zero-values
 
         # X, y specific stds
-        dists = dists / adaptive_std[x] 
+        dists = dists / adaptive_std[x]
         W = csr_matrix((np.exp(-dists), (x, y)), shape=[N, N])
-        W.setdiag(1) 
-        
+        W.setdiag(1)
+
         # Diffusion components
-        kernel = W + W.T 
+        kernel = W + W.T
 
         # Markov or Transition matrix
         D = np.ravel(kernel.sum(axis=1))
         D[D != 0] = 1 / D[D != 0]
-        T = csr_matrix((D, (range(N), range(N))), shape=[N, N]).dot(kernel) 
-        
+        T = csr_matrix((D, (range(N), range(N))), shape=[N, N]).dot(kernel)
+
         # Eigen value decomposition
-        D, V = eigs(T, n_components, tol=1e-4, maxiter=1000) 
-        D = np.real(D) # eigenvalues 
-        V = np.real(V) # eigenvectors
+        D, V = eigs(T, n_components, tol=1e-4, maxiter=1000)
+        D = np.real(D)  # eigenvalues
+        V = np.real(V)  # eigenvectors
         inds = np.argsort(D)[::-1]
         D = D[inds]
         V = V[:, inds]
@@ -137,7 +138,7 @@ def rank_gene(
         # cells of interest - all cells relating to provided cell neighborhood/group (ie celltype): Question: could there be multiples of same cell id?
         # zscore
         # check for input
-        
+
         # condition 1: sim_graph should be provided as a pandas data frame
         if isinstance(sim_graph, pd.DataFrame):
             cells_num_row = len(set(cells_of_interest).difference(set(sim_graph.index)))
@@ -148,7 +149,7 @@ def rank_gene(
                 raise ValueError('Some cells of interest not in similarity graph')
         else:
             raise ValueError('sim_graph must be pandas dataframe with cell names as index and columns')
-            
+
         # condition 3: feature must also be provided as pandas dataframe
         if isinstance(feature, pd.DataFrame):
             cells_num = len(set(cells_of_interest).difference(set(feature.index)))
@@ -156,56 +157,55 @@ def rank_gene(
                 raise ValueError('Some cells of interest not in provided feature')
         else:
             raise ValueError('feature must be pandas dataframe with cell names as index')
-        
+
         if zscore:
             feature_zs = scipy.stats.zscore(feature)
         else:
             feature_zs = feature
-        
+
         # isolate the similarity graph for the cells of interest
         sim_graph_interest = sim_graph.loc[cells_of_interest][cells_of_interest]
-        
+
         # isolate the feature values for the cells of interest
         feature_interest = feature_zs.loc[cells_of_interest]
-        
+
         # compute outer product for faster computation between feature values
         feature_outer = np.outer(feature_interest.values, feature_interest.values)
-        
+
         # product of weight with feature values
         weight_dot_feature = sim_graph_interest.values * feature_outer
 
         if self_autocorrelate:
             k = 0
         else:
-            k = 1    
+            k = 1
         # compute score
         # summing time: avoiding the j=i diagonal by summing the upper triangle
         score = np.sum(np.triu(weight_dot_feature, k))
-        
+
         # TODO: play with normalization possibilities
         # normalize score in some way <- here you can play with different techniques
-        #score_norm = score/len(cells_of_interest)        
-        score_norm = score/np.sum(np.triu(sim_graph_interest.values, k))
+        # score_norm = score/len(cells_of_interest)
+        score_norm = score / np.sum(np.triu(sim_graph_interest.values, k))
 
         # return
         return score, score_norm
-        
-    dm_res = run_diffusion_maps(pd.DataFrame(adata.obsm['X_pca'], index = adata.obs_names), 
-                                    n_components,
-                                    knn,
-                                    metric,
-                                    n_jobs)
-    sim_graph = pd.DataFrame(dm_res['T'].toarray(), index = adata.obs_names, columns = adata.obs_names)
 
-    df_temp = pd.DataFrame(index = np.unique(adata.obs[cell_group_by]), 
-                        columns = adata.obsm['X_factors'].columns, dtype = 'float32') # this specifically is celltype by factors
+    dm_res = run_diffusion_maps(pd.DataFrame(adata.obsm['X_pca'], index=adata.obs_names),
+                                n_components,
+                                knn,
+                                metric,
+                                n_jobs)
+    sim_graph = pd.DataFrame(dm_res['T'].toarray(), index=adata.obs_names, columns=adata.obs_names)
 
-    for feature_item in adata.obsm['X_factors'].columns: # for every factor
-        feature = pd.DataFrame(adata.obsm['X_factors'][feature_item], index = adata.obs.index) # this is every cell by single factor
-        for item in df_temp.index: # for every celltype/condition/neighborhood notion
-            cells_of_interest = adata.obs.index[adata.obs[cell_group_by] == item] # select cells that are of the right cell neighborhood
-            df_temp.loc[item][feature_item] = feature_autocorrelation(feature, sim_graph, 
-                                                                cells_of_interest = cells_of_interest, zscore=zscore, self_autocorrelate=self_autocorrelate)[0] # update output dataframe of the given cell neighborhood
+    df_temp = pd.DataFrame(index=np.unique(adata.obs[cell_group_by]),
+                           columns=adata.obsm['X_factors'].columns, dtype='float32')  # this specifically is celltype by factors
+
+    for feature_item in adata.obsm['X_factors'].columns:  # for every factor
+        feature = pd.DataFrame(adata.obsm['X_factors'][feature_item], index=adata.obs.index)  # this is every cell by single factor
+        for item in df_temp.index:  # for every celltype/condition/neighborhood notion
+            cells_of_interest = adata.obs.index[adata.obs[cell_group_by] == item]  # select cells that are of the right cell neighborhood
+            df_temp.loc[item][feature_item] = feature_autocorrelation(feature, sim_graph,
+                                                                      cells_of_interest=cells_of_interest, zscore=zscore, self_autocorrelate=self_autocorrelate)[0]  # update output dataframe of the given cell neighborhood
 
     return df_temp
-
