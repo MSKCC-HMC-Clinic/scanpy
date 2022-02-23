@@ -11,6 +11,8 @@ from typing import Union, Optional, List, Tuple, Sequence
 import scipy
 from scipy.sparse import find, csr_matrix
 from scipy.sparse.linalg import eigs
+import seaborn as sns
+
 from anndata import AnnData
 
 from matplotlib.cm import get_cmap
@@ -206,6 +208,24 @@ def rank_gene(
         for item in df_temp.index:  # for every celltype/condition/neighborhood notion
             cells_of_interest = adata.obs.index[adata.obs[cell_group_by] == item]  # select cells that are of the right cell neighborhood
             df_temp.loc[item][feature_item] = feature_autocorrelation(feature, sim_graph,
-                                                                      cells_of_interest=cells_of_interest, zscore=zscore, self_autocorrelate=self_autocorrelate)[0]  # update output dataframe of the given cell neighborhood
+                                                                      cells_of_interest=cells_of_interest,
+                                                                        zscore=zscore, self_autocorrelate=self_autocorrelate)[0]  # update output dataframe of the given cell neighborhood
 
     return df_temp
+
+def rank_gene_heatmap(
+    rank_gene_df: pd.DataFrame,
+    vmin: Optional[float] = -3,
+    vmax: Optional[float] = 3,
+    cmap: Optional[str] = 'bwr',
+    annot: Optional[bool] = False,
+    fmt: Optional[str] = None,
+    annot_kws: Optional[dict] = None,
+    cbar: Optional[bool] = True
+): # -> sns.matrix.ClusterGrid # do we need a return turn here
+    # z_score = 1 to operate across columns (factors)
+    sns.clustermap(rank_gene_df, z_score = 1, cmap = cmap, 
+                   vmin = vmin, vmax = vmax, annot = annot, 
+                   fmt = fmt, annot_kws = annot_kws, cbar = cbar)
+
+

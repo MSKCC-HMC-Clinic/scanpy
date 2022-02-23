@@ -37,5 +37,5 @@ def test_gene_ranking():
     # assert ranked_df.index.to_numpy().equals(np.unique(adata.obs["Celltype_myeloid"]))
     assert np.array_equal(ranked_df.index.to_numpy(), np.unique(adata.obs["Celltype_myeloid"]))
 
-
+    
 
