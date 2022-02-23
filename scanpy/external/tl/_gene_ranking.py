@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import scanpy as sc
 import anndata
+from matplotlib import axes
 import matplotlib.pyplot as plt
 import seaborn as sns
 import umap
@@ -11,7 +12,6 @@ from typing import Union, Optional, List, Tuple, Sequence
 import scipy
 from scipy.sparse import find, csr_matrix
 from scipy.sparse.linalg import eigs
-import seaborn as sns
 
 from anndata import AnnData
 
@@ -221,11 +221,15 @@ def rank_gene_heatmap(
     annot: Optional[bool] = False,
     fmt: Optional[str] = None,
     annot_kws: Optional[dict] = None,
-    cbar: Optional[bool] = True
-): # -> sns.matrix.ClusterGrid # do we need a return turn here
+    cbar: Optional[bool] = True,
+    out_dir: Optional[str] = "heatmap.png"
+) -> axes: # -> sns.matrix.ClusterGrid # do we need a return turn here
     # z_score = 1 to operate across columns (factors)
-    sns.clustermap(rank_gene_df, z_score = 1, cmap = cmap, 
-                   vmin = vmin, vmax = vmax, annot = annot, 
+    g = sns.clustermap(rank_gene_df, z_score = 1, cmap = cmap,
+                   vmin = vmin, vmax = vmax, annot = annot,
                    fmt = fmt, annot_kws = annot_kws, cbar = cbar)
 
+    ax = g.ax_heatmap
+    ax.savefig(out_dir)
+    return ax
 

@@ -36,6 +36,8 @@ def test_gene_ranking():
     #       ensure dimensions are as expected
     # assert ranked_df.index.to_numpy().equals(np.unique(adata.obs["Celltype_myeloid"]))
     assert np.array_equal(ranked_df.index.to_numpy(), np.unique(adata.obs["Celltype_myeloid"]))
+    return ranked_df
 
-    
+def test_heat_map(ranked_df):
+    return sce.tl.rank_gene_heatmap(ranked_df)
 
