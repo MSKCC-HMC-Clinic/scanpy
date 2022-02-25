@@ -27,7 +27,7 @@ def cluster_covariance(
     morans_i: Optional[bool] = False
 ):
     """\
-    Generates and saves a covariance matrix across genes within a cluster. 
+    Generates and optionally saves a covariance matrix across genes within a cluster. 
     Reports percent of genes with covariance greater than chosen threshold (default = 0).
     Optionally reports Moran's I calculation on covariance matrix and Moran's I scatterplot.
     
