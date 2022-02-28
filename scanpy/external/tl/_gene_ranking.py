@@ -12,6 +12,10 @@ from typing import Union, Optional, List, Tuple, Sequence
 import scipy
 from scipy.sparse import find, csr_matrix
 from scipy.sparse.linalg import eigs
+import psysal 
+from libpysal.weights import law2W
+from esda.moran import Moran
+from splot.esda import moran_scatterplot, plot_moran
 
 from anndata import AnnData
 
@@ -28,7 +32,7 @@ def rank_gene(
     n_jobs: Optional[int] = -1,
     zscore: Optional[bool] = False,
     self_autocorrelate: Optional[bool] = True,
-    # normalization_type: Optional[str] = None,
+    normalization_type: Optional[str] = None,
 ) -> pd.DataFrame:
 
     """\
@@ -55,7 +59,8 @@ def rank_gene(
     self_autocorrelate: boolean
         Boolean indicating whether to include values of a cell to itself when calculating spatial autocorrelation; default true
     normalization_type: str
-        TODO: test different normalization techniques on spatial autocorrelation output
+        test different normalization techniques on spatial autocorrelation output
+        default none, if 
 
     Returns
     -------
@@ -63,6 +68,11 @@ def rank_gene(
 
     Notes
     -------
+
+    Options for normalization used in feature_autocorrelation():
+    This is for the given factor and cell_group_by type:
+    - 'by_number_cells': normalize by the total number of cells 
+    - 'by_total_transition_probability': normalize by the sum of the transition matrix probabilities (follows self_autocorrelate parameter)
 
     Example
     -------
@@ -134,7 +144,17 @@ def rank_gene(
 
         return res
 
-    def feature_autocorrelation(feature, sim_graph, cells_of_interest, zscore, self_autocorrelate):
+    def feature_autocorrelation(feature, sim_graph, cells_of_interest, zscore, self_autocorrelate, normalization_type):
+        """Given a list of cells_of_interest and feature, compute the autocorrelation of the feature
+        in the given cell types
+        :param feature: factor matrix values for each cell for that factor
+        :param sim_graph: annotated transition matrix
+        :param cells_of_interest: all cells of specific cell_group_by type
+        :param zscore: boolean denoting choice to zscore data
+        :param self_autocorrelate: boolean denoting choice to include self_autocorrelation
+        :param normalization_type: method of normalizing data 
+        :return: feature autocorrelation score normalized by given metric 
+        """ 
         # feature - cells by one factor
         # sim_graph - labeled transition matrix, see below
         # cells of interest - all cells relating to provided cell neighborhood/group (ie celltype): Question: could there be multiples of same cell id?
@@ -187,9 +207,32 @@ def rank_gene(
 
         # TODO: play with normalization possibilities
         # normalize score in some way <- here you can play with different techniques
-        # score_norm = score/len(cells_of_interest)
-        score_norm = score / np.sum(np.triu(sim_graph_interest.values, k))
+        # score_norm = score/len(cells_of_interest) # by total cells
+        
+        if normalization_type == "by_total_transition_probability":
+            score_norm = score / np.sum(np.triu(sim_graph_interest.values, k))
+        elif normalization_type == "by_number_cells":
+            score_norm = score/len(cells_of_interest)
+           
+            # Eve's Moran's I code
+            # # Create the matrix of weigthts 
+            # w = lat2W(sim_graph_interest.shape[0], sim_graph_interest.shape[1])
 
+            # #  Create the pysal Moran object 
+            # mi = Moran(sim_graph_interest, w)
+
+            # # Verify Moran's I results 
+            # print(f"Moran's I Calculation: {round(mi.I,3)}")
+        # L1 matrix norm
+        # L2 matrix norm
+        # Normalize by convergence speed
+        # Normalize by cluster size
+        # Normalize by concentration of transition matrix
+        # Cluster covariance????
+        # If no normalization implemented, return duplicate score
+        else:
+            score_norm = score
+            
         # return
         return score, score_norm
 
@@ -207,25 +250,60 @@ def rank_gene(
         feature = pd.DataFrame(adata.obsm['X_factors'][feature_item], index=adata.obs.index)  # this is every cell by single factor
         for item in df_temp.index:  # for every celltype/condition/neighborhood notion
             cells_of_interest = adata.obs.index[adata.obs[cell_group_by] == item]  # select cells that are of the right cell neighborhood
-            df_temp.loc[item][feature_item] = feature_autocorrelation(feature, sim_graph,
-                                                                      cells_of_interest=cells_of_interest,
-                                                                        zscore=zscore, self_autocorrelate=self_autocorrelate)[0]  # update output dataframe of the given cell neighborhood
+           
+            autocorrelation_sum = feature_autocorrelation(feature, sim_graph,
+                                                          cells_of_interest=cells_of_interest,
+                                                          zscore=zscore, self_autocorrelate=self_autocorrelate, normalization_type=normalization_type)  # update output dataframe of the given cell neighborhood
+            if normalization_type:
+                # return normalized score
+                df_temp.loc[item][feature_item] = autocorrelation_sum[1]
+            else:
+                df_temp.loc[item][feature_item] = autocorrelation_sum[0]
 
     return df_temp
 
 def rank_gene_heatmap(
     rank_gene_df: pd.DataFrame,
-    vmin: Optional[float] = -3,
-    vmax: Optional[float] = 3,
+    zscore_by: int = 1,
+    vmin: Optional[float] = None,
+    vmax: Optional[float] = None,
     cmap: Optional[str] = 'bwr',
     annot: Optional[bool] = False,
     fmt: Optional[str] = None,
     annot_kws: Optional[dict] = None,
     cbar: Optional[bool] = True,
     out_dir: Optional[str] = "heatmap.png"
-) -> axes: # -> sns.matrix.ClusterGrid # do we need a return turn here
-    # z_score = 1 to operate across columns (factors)
-    g = sns.clustermap(rank_gene_df, z_score = 1, cmap = cmap,
+) -> axes: 
+
+    """\
+
+    Given the data frame output of rank_gene(), produce a heatmap of cell_group_by type
+    by the factors. Heatmap is colored by normalized z-score
+    
+    Parameters
+    ----------
+    rank_gene_df: pandas dataframe with factors (columns) and celltypes (rows)
+         containing ranking scores. Scores could or could not be z-scored. 
+    zscore_by: dimension by which to normalize, either by factors (zscore_by = 1)
+        or by cell_group_by type (zscore_by = 0)
+    vmin: minimum value for colorbar on heatmap. Set as default
+         to -max(abs(x)) for all x in the data.
+    vmax: maximum value for colorbar on heatmap. Set as default
+         to max(abs(x)) for all x in the data.
+    cmap: Inherited from sns heatmap. 
+    annot: Inherited from sns heatmap. 
+    fmt: Inherited from sns heatmap. 
+    annot_kws: Inherited from sns heatmap. 
+    cbar: Inherited from sns heatmap. 
+    out_dir: Inherited from sns heatmap. 
+    
+    Returns
+    -------
+    Matplotlib axes object
+    
+    """
+        
+    g = sns.clustermap(rank_gene_df, z_score = zscore_by, cmap = cmap,
                    vmin = vmin, vmax = vmax, annot = annot,
                    fmt = fmt, annot_kws = annot_kws, cbar = cbar)
 
