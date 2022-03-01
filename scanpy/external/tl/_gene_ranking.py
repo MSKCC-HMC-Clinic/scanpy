@@ -10,12 +10,15 @@ import phenograph
 from sklearn.neighbors import NearestNeighbors
 from typing import Union, Optional, List, Tuple, Sequence
 import scipy
+import scipy.stats as stats
 from scipy.sparse import find, csr_matrix
 from scipy.sparse.linalg import eigs
-import psysal 
-from libpysal.weights import law2W
-from esda.moran import Moran
-from splot.esda import moran_scatterplot, plot_moran
+# import psysal 
+# from libpysal.weights import law2W
+# from esda.moran import Moran
+# from splot.esda import moran_scatterplot, plot_moran
+
+
 
 from anndata import AnnData
 
@@ -302,7 +305,15 @@ def rank_gene_heatmap(
     Matplotlib axes object
     
     """
-        
+    
+    zscore_temp = stats.zscore(abs(rank_gene_df), axis = zscore_by)
+    max_abs_value = zscore_temp.max().max()
+
+    if not vmin:
+        vmin = -1*max_abs_value
+    if not vmax:
+        vmax = max_abs_value
+
     g = sns.clustermap(rank_gene_df, z_score = zscore_by, cmap = cmap,
                    vmin = vmin, vmax = vmax, annot = annot,
                    fmt = fmt, annot_kws = annot_kws, cbar = cbar)
