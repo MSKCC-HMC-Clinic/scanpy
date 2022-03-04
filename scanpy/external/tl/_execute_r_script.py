@@ -7,6 +7,8 @@ import subprocess
 import os
 import shutil
 
+from ... import settings
+
 
 HERE = Path(__file__).parent
 
@@ -64,13 +66,18 @@ def execute_r_script(
     try:
 
         # create temp directory for r script files
-        temp_dir = os.path.join(HERE,'_tmp')
+
+        # temp_dir = os.path.join(HERE,'_tmp')
+        temp_dir = settings.cachedir
+        print("temp_dir", temp_dir)
         if not os.path.exists(temp_dir):
             os.mkdir(temp_dir)
 
-        path2rscript = os.path.join(HERE,'_scripts', r_filename)
+        rfilepath = os.path.join(HERE,'_scripts', r_filename)
 
-        command = [rscript_path, path2rscript, '--vanilla', temp_dir]
+        command = [rscript_path, rfilepath, '--vanilla', temp_dir]
+        # command = [rscript_path, path2rscript, '--vanilla', settings.cachedir]
+
 
         # add optional arguments that are specific to the r_filename.R script
         if arguments is not None:
@@ -90,11 +97,11 @@ def execute_r_script(
         return False
 
 
-def remove_temp_dir():
+def clear_cache():
 
     """\
 
-    Helper function that recursively removes the _tmp directory and all files in it
+    Helper function that recursively removes the settings.cachedir directory and all files in it
 
     Notes
     -------
@@ -103,25 +110,25 @@ def remove_temp_dir():
 
     Example
     -------
-    # assume running 'test.R' generates a 'test.csv' file in the _temp directory
+    # assume running 'test.R' generates a 'test.csv' file in the settings.cachedir directory
     >>> is_success = scanpy.external.tl.execute_r_script('PATH_TO_Rscript.exe', 'test.R')
     # process 'test.csv'
     >>> test_csv = pd.read_csv('test.csv')
-    # remove _temp directory and its contents
-    >>> remove_tmp_dir()
+    # remove settings.cachedir directory and its contents
+    >>> clear_cache()
     """
-    temp_dir = os.path.join(HERE, '_tmp')
+    temp_dir = settings.cachedir
     if os.path.exists(temp_dir):
         shutil.rmtree(temp_dir)
 
 
-def remove_temp_file(
+def remove_cache_file(
     filename: str = None
 ):
 
     """\
 
-    Helper function that removes a specified file from the _tmp directory
+    Helper function that removes a specified file from the settings.cachedir directory
 
     Notes
     -------
@@ -130,13 +137,13 @@ def remove_temp_file(
 
     Example
     -------
-    # assume running 'test.R' generates a 'test.csv' and 'test.txt' file in the _temp directory
+    # assume running 'test.R' generates a 'test.csv' and 'test.txt' file in the settings.cachedir directory
     >>> is_success = scanpy.external.tl.execute_r_script('PATH_TO_Rscript.exe', 'test.R')
     # process 'test.csv'
     >>> test_csv = pd.read_csv('test.csv')
     # remove just the 'test.csv' file
-    >>> remove_temp_file('test.csv')
+    >>> remove_cache_file('test.csv')
     """
-    temp_file = os.path.join(HERE, '_tmp', filename)
+    temp_file = os.path.join(settings.cachedir, filename)
     if os.path.exists(temp_file):
         os.remove(temp_file)
