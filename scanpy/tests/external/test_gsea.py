@@ -6,6 +6,7 @@ import scanpy.external as sce
 from matplotlib.testing.compare import compare_images
 import os
 import shutil
+from scanpy import settings
 
 # pytest.importorskip("gsea")
 
@@ -25,32 +26,43 @@ def test_gsea_barplot():
 
 def test_gseapy():
     """
-    Test that type = 'gseapy' option for gsea() works
+    Test reproducibility and whether type = 'gseapy' option for gsea()
     """
-    # remove old test file, if applicable
-    test_file_path = '_data/test_gseapy_df.csv'
-    if os.path.exists(test_file_path):
-        os.remove(test_file_path)
+    # clear cache
+    sc.external.tl.clear_cache()
+    cachedir = settings.cachedir
+
+    # define paths for first and second files for comparison
+    first_test_file_path = os.path.join(cachedir,'first_gseapy_df.csv')
+    second_test_file_path = os.path.join(cachedir,'second_gseapy_df.csv')
+
     # test .rnk and .gmt input
     # KEGG_2016 is primary test example for gseapy: data from https://maayanlab.cloud/Enrichr/#libraries
-    sce.tl.gsea(input_gene_ranking_file='./_data/gsea_data.gsea_data.rnk', hallmark_gene_sets_file='./_data/KEGG_2016.gmt', type='gseapy', out_dir='_data/test_gseapy_df.csv')
-    master_gseapy_sample_df = pd.read_csv('_data/master_gseapy_df.csv')
-    test_gseapy_sample_df = pd.read_csv('_data/test_gseapy_df.csv')
-    assert test_gseapy_sample_df.equals(master_gseapy_sample_df)
+    sce.tl.gsea(input_gene_ranking_file='./_data/gsea_data.gsea_data.rnk', hallmark_gene_sets_file='./_data/KEGG_2016.gmt', type='gseapy', out_dir=first_test_file_path, cache=False)
+    sce.tl.gsea(input_gene_ranking_file='./_data/gsea_data.gsea_data.rnk', hallmark_gene_sets_file='./_data/KEGG_2016.gmt', type='gseapy', out_dir=second_test_file_path, cache=False)
+
+    first_gseapy_sample_df = pd.read_csv(first_test_file_path)
+    second_gseapy_sample_df = pd.read_csv(second_test_file_path)
+    assert first_gseapy_sample_df.equals(second_gseapy_sample_df)
 
 
 def test_fgsea(
     rscript_path=None
 ):
     """
-    Test that type = 'fgsea' module option for gsea() works
+    Test reproducibility that type = 'fgsea' module option for gsea() works
     """
-    # remove old test file, if applicable
-    test_file_path = '_data/test_fgsea_df.csv'
-    if os.path.exists(test_file_path):
-        os.remove(test_file_path)
+
+    sc.external.tl.clear_cache()
+    cachedir = settings.cachedir
+
+    # define paths for first and second files for comparison
+    first_test_file_path = os.path.join(cachedir,'first_fgsea_df.csv')
+    second_test_file_path = os.path.join(cachedir,'second_fgsea_df.csv')
+
     # test .rnk and .gmt input
-    sce.tl.gsea(input_gene_ranking_file='./_data/gsea_data.gsea_data.rnk', hallmark_gene_sets_file='./_data/h.all.v7.4.symbols.gmt', type='fgsea', out_dir='_data/test_fgsea_df.csv', rscript_path=rscript_path, cache=True)
-    master_fgsea_sample_df = pd.read_csv('_data/master_fgsea_df.csv')
-    test_fgsea_sample_df = pd.read_csv('_data/test_fgsea_df.csv')
-    assert test_fgsea_sample_df.equals(master_fgsea_sample_df)
+    sce.tl.gsea(input_gene_ranking_file='./_data/gsea_data.gsea_data.rnk', hallmark_gene_sets_file='./_data/h.all.v7.4.symbols.gmt', type='fgsea', out_dir=first_test_file_path, rscript_path=rscript_path, cache=True)
+    sce.tl.gsea(input_gene_ranking_file='./_data/gsea_data.gsea_data.rnk', hallmark_gene_sets_file='./_data/h.all.v7.4.symbols.gmt', type='fgsea', out_dir=second_test_file_path, rscript_path=rscript_path, cache=True)
+    first_fgsea_sample_df = pd.read_csv(first_test_file_path)
+    second_fgsea_sample_df = pd.read_csv(second_test_file_path)
+    assert first_fgsea_sample_df.equals(second_fgsea_sample_df)

@@ -7,24 +7,24 @@ import scanpy.external as sce
 import os
 import filecmp
 import shutil
-
 from scanpy import settings
 
 # pytest.importorskip("execute_r_script")
+
 
 def test_arguments(
     rscript_path=None,
     verbosity=False
 ):
     """Test providing arguments to python subprocess command and cache creation and removal"""
-    
-    # create cache
+
+    # clear cache
     cachedir = settings.cachedir
     if os.path.exists(cachedir):
         shutil.rmtree(cachedir)
 
     arguments = ['test.txt', 'contents']
-    
+
     # .R script is located in /external/tl/_scripts
     sce.tl.execute_r_script(rscript_path, r_filename='example_arguments.R', arguments=arguments, verbosity=verbosity)
 
@@ -52,7 +52,7 @@ def test_fgsea(
         differs between MAC OS and Windows machines.
     """
 
-    # create cache
+    # clear cache
     cachedir = settings.cachedir
     if os.path.exists(cachedir):
         shutil.rmtree(cachedir)
@@ -61,7 +61,7 @@ def test_fgsea(
 
     sce.tl.execute_r_script(rscript_path, r_filename='example_fgsea.R', arguments=['second_fgseaRes.csv'], verbosity=verbosity)
 
-    # define paths for test and master files for comparison
+    # define paths for first and second files for comparison
     first_test_file_path = os.path.join(cachedir,'first_fgseaRes.csv')
     second_test_file_path = os.path.join(cachedir,'second_fgseaRes.csv')
 
@@ -69,7 +69,7 @@ def test_fgsea(
     assert os.path.exists(first_test_file_path)
     assert os.path.exists(second_test_file_path)
     # assert filecmp.cmp(test_file_path, master_file_path, shallow=False)
-    
+
     first_fgsea_sample_df = pd.read_csv(first_test_file_path)
     second_fgsea_sample_df = pd.read_csv(second_test_file_path)
     assert first_fgsea_sample_df.equals(second_fgsea_sample_df)

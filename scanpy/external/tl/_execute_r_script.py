@@ -6,9 +6,7 @@ import matplotlib.pyplot as plt
 import subprocess
 import os
 import shutil
-
 from ... import settings
-
 
 HERE = Path(__file__).parent
 
@@ -58,7 +56,6 @@ def execute_r_script(
     >>> is_success = scanpy.external.tl.execute_r_script('PATH_TO_Rscript.exe', 'test.R')
 
     """
-    print("HERE: ", HERE)
 
     if rscript_path is None:
         raise ValueError('Please provide the local path to your Rscript.exe executable')
@@ -75,8 +72,6 @@ def execute_r_script(
         rfilepath = os.path.join(HERE,'_scripts', r_filename)
 
         command = [rscript_path, rfilepath, '--vanilla', cachedir]
-        # command = [rscript_path, path2rscript, '--vanilla', settings.cachedir]
-
 
         # add optional arguments that are specific to the r_filename.R script
         if arguments is not None:
