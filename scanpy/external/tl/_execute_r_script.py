@@ -74,8 +74,6 @@ def execute_r_script(
         rfilepath = os.path.join(HERE,'_scripts', r_filename)
 
         command = [rscript_path, rfilepath, '--vanilla', cachedir]
-        # command = [rscript_path, path2rscript, '--vanilla', settings.cachedir]
-
 
         # add optional arguments that are specific to the r_filename.R script
         if arguments is not None:
