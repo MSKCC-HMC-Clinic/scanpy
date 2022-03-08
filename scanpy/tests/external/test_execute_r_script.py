@@ -58,7 +58,11 @@ def test_fgsea(
 
     # test that the file created by arguments provided to execute_r_script
     assert os.path.exists(test_file_path)
-    assert filecmp.cmp(test_file_path, master_file_path, shallow=False)
+    # assert filecmp.cmp(test_file_path, master_file_path, shallow=False)
+    
+    master_fgsea_sample_df = pd.read_csv(master_file_path)
+    test_fgsea_sample_df = pd.read_csv(test_file_path)
+    assert test_fgsea_sample_df.equals(master_fgsea_sample_df)
 
     # test the remove_cache_dir function to delete all files under directory
     sce.tl.clear_cache()
