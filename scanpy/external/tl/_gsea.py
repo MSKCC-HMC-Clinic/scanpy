@@ -215,8 +215,7 @@ def gsea(
 
     # create cachedir if applicable
     cachedir = settings.cachedir
-    if not os.path.exists(cachedir):
-        os.mkdir(cachedir)
+    sce.tl.create_cache()
 
     if type == 'gseapy':
 
@@ -304,4 +303,3 @@ def gsea(
             fgsea_df.to_csv(out_dir, index=True)
 
         return fgsea_df
-
