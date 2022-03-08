@@ -6,9 +6,7 @@ import matplotlib.pyplot as plt
 import subprocess
 import os
 import shutil
-
 from ... import settings
-
 
 HERE = Path(__file__).parent
 
@@ -68,8 +66,7 @@ def execute_r_script(
 
         # create cache directory for temporary files
         cachedir = settings.cachedir
-        if not os.path.exists(cachedir):
-            os.mkdir(cachedir)
+        create_cache()
 
         rfilepath = os.path.join(HERE,'_scripts', r_filename)
 
@@ -91,6 +88,14 @@ def execute_r_script(
 
     except os.error:
         return False
+
+
+def create_cache():
+    """Helper function that creates the scanpy._settings.ScanpyConfig.cachedir directory"""
+    # create cache directory for temporary files
+    cachedir = settings.cachedir
+    if not os.path.exists(cachedir):
+        os.mkdir(cachedir)
 
 
 def clear_cache():

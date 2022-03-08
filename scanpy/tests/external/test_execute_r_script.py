@@ -18,7 +18,7 @@ def test_arguments(
 ):
     """Test providing arguments to python subprocess command and cache creation and removal"""
 
-    # create cache
+    # clear cache
     cachedir = settings.cachedir
     if os.path.exists(cachedir):
         shutil.rmtree(cachedir)
@@ -52,7 +52,7 @@ def test_fgsea(
         differs between MAC OS and Windows machines.
     """
 
-    # create cache
+    # clear cache
     cachedir = settings.cachedir
     if os.path.exists(cachedir):
         shutil.rmtree(cachedir)
@@ -61,7 +61,7 @@ def test_fgsea(
 
     sce.tl.execute_r_script(rscript_path, r_filename='example_fgsea.R', arguments=['second_fgseaRes.csv'], verbosity=verbosity)
 
-    # define paths for test and master files for comparison
+    # define paths for first and second files for comparison
     first_test_file_path = os.path.join(cachedir,'first_fgseaRes.csv')
     second_test_file_path = os.path.join(cachedir,'second_fgseaRes.csv')
 
