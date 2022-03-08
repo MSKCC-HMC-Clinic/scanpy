@@ -46,8 +46,9 @@ def execute_r_script(
     provided script using the subprocess module
 
     Any files created by running the r_filename.R script will be saved in a
-    /_temp directory. Any external function that calls execute_r_script will be
-    responsible for removing this _tmp directory and its files
+    scanpy._settings.ScanpyConfig.cachedir directory (default './cache/')
+    Any external function that calls execute_r_script will be
+    responsible for removing this cache directory and its files
 
     The r_filename.R script provided as a parameter must be contained in the
     scanpy/external/tl/_scripts directory
@@ -65,17 +66,14 @@ def execute_r_script(
 
     try:
 
-        # create temp directory for r script files
-
-        # temp_dir = os.path.join(HERE,'_tmp')
-        temp_dir = settings.cachedir
-        print("temp_dir", temp_dir)
-        if not os.path.exists(temp_dir):
-            os.mkdir(temp_dir)
+        # create cache directory for temporary files
+        cachedir = settings.cachedir
+        if not os.path.exists(cachedir):
+            os.mkdir(cachedir)
 
         rfilepath = os.path.join(HERE,'_scripts', r_filename)
 
-        command = [rscript_path, rfilepath, '--vanilla', temp_dir]
+        command = [rscript_path, rfilepath, '--vanilla', cachedir]
         # command = [rscript_path, path2rscript, '--vanilla', settings.cachedir]
 
 
@@ -101,7 +99,7 @@ def clear_cache():
 
     """\
 
-    Helper function that recursively removes the settings.cachedir directory and all files in it
+    Helper function that recursively removes the scanpy._settings.ScanpyConfig.cachedir directory and all files in it
 
     Notes
     -------
@@ -128,7 +126,7 @@ def remove_cache_file(
 
     """\
 
-    Helper function that removes a specified file from the settings.cachedir directory
+    Helper function that removes a specified file from the scanpy._settings.ScanpyConfig.cachedir directory
 
     Notes
     -------
