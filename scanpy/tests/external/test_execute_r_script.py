@@ -36,9 +36,9 @@ def test_arguments(
     assert filecmp.cmp(test_file_path, master_file_path, shallow=False)
 
     # test the remove_cache_file and clear_cache functions
-    sce.tl.remove_cache_file('test.txt')
+    # sce.tl.remove_cache_file('test.txt')
     assert not os.path.exists(test_file_path)
-    sce.tl.clear_cache()
+    # sce.tl.clear_cache()
     assert not os.path.exists(cachedir)
 
 
