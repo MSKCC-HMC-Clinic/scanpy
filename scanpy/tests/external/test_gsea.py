@@ -1,3 +1,4 @@
+import csv
 import pytest
 
 import scanpy as sc
@@ -26,25 +27,25 @@ def test_gsea_barplot():
 
 def test_gseapy():
     """
-    Test reproducibility and whether type = 'gseapy' option for gsea()
+    Test reproducibility for type = 'gseapy'
+    test input_gene_ranking_file inputs for type .csv and .rnk
+    test hallmark_gene_sets_file inputs for type .gmt
     """
-    # clear cache
+    # clear and create cache
     sc.external.tl.clear_cache()
-    cachedir = settings.cachedir
+    sc.external.tl.create_cache()
 
-    # define paths for first and second files for comparison
-    first_test_file_path = os.path.join(cachedir,'first_gseapy_df.csv')
-    second_test_file_path = os.path.join(cachedir,'second_gseapy_df.csv')
+    # test .rnk and .csv for input_gene_ranking_file
+    input_gene_ranking_rnk = './_data/gsea_data.gsea_data.rnk'
+    input_gene_ranking_csv = './_data/gsea_data.csv'
 
-    # test .rnk and .gmt input
+    # test .gmt for hallmark_gene_sets_file
     # KEGG_2016 is primary test example for gseapy: data from https://maayanlab.cloud/Enrichr/#libraries
-    sce.tl.gsea(input_gene_ranking_file='./_data/gsea_data.gsea_data.rnk', hallmark_gene_sets_file='./_data/KEGG_2016.gmt', type='gseapy', out_dir=first_test_file_path, cache=False)
-    sce.tl.gsea(input_gene_ranking_file='./_data/gsea_data.gsea_data.rnk', hallmark_gene_sets_file='./_data/KEGG_2016.gmt', type='gseapy', out_dir=second_test_file_path, cache=False)
+    hallmark_gene_sets_gmt = './_data/KEGG_2016.gmt'
 
-    first_gseapy_sample_df = pd.read_csv(first_test_file_path)
-    second_gseapy_sample_df = pd.read_csv(second_test_file_path)
-    assert first_gseapy_sample_df.equals(second_gseapy_sample_df)
-
+    # test reproducibility for gseapy
+    test_reproducibility('gseapy', input_gene_ranking_rnk, hallmark_gene_sets_gmt)
+    test_reproducibility('gseapy', input_gene_ranking_csv, hallmark_gene_sets_gmt)
 
 def test_fgsea(
     rscript_path=None
@@ -52,17 +53,34 @@ def test_fgsea(
     """
     Test reproducibility that type = 'fgsea' module option for gsea() works
     """
-
+  # clear and create cache
     sc.external.tl.clear_cache()
+    sc.external.tl.create_cache()
+
+    # test .rnk and .csv for input_gene_ranking_file
+    input_gene_ranking_rnk = './_data/gsea_data.gsea_data.rnk'
+    input_gene_ranking_csv = './_data/gsea_data.csv'
+
+    # test .gmt for hallmark_gene_sets_file
+    # KEGG_2016 is primary test example for gseapy: data from https://maayanlab.cloud/Enrichr/#libraries
+    hallmark_gene_sets_gmt = './_data/KEGG_2016.gmt'
+
+    # test reproducibility for fgsea
+    test_reproducibility('fgsea', input_gene_ranking_rnk, hallmark_gene_sets_gmt, rscript_path)
+    # test_reproducibility('fgsea', input_gene_ranking_csv, hallmark_gene_sets_gmt, rscript_path)
+
+
+def test_reproducibility(type, input_gene_ranking_file, hallmark_gene_sets_file, rscript_path=None):
+    
     cachedir = settings.cachedir
 
     # define paths for first and second files for comparison
-    first_test_file_path = os.path.join(cachedir,'first_fgsea_df.csv')
-    second_test_file_path = os.path.join(cachedir,'second_fgsea_df.csv')
+    first_test_file_path = os.path.join(cachedir,'first_df.csv')
+    second_test_file_path = os.path.join(cachedir,'second_df.csv')
 
-    # test .rnk and .gmt input
-    sce.tl.gsea(input_gene_ranking_file='./_data/gsea_data.gsea_data.rnk', hallmark_gene_sets_file='./_data/h.all.v7.4.symbols.gmt', type='fgsea', out_dir=first_test_file_path, rscript_path=rscript_path, cache=True)
-    sce.tl.gsea(input_gene_ranking_file='./_data/gsea_data.gsea_data.rnk', hallmark_gene_sets_file='./_data/h.all.v7.4.symbols.gmt', type='fgsea', out_dir=second_test_file_path, rscript_path=rscript_path, cache=True)
-    first_fgsea_sample_df = pd.read_csv(first_test_file_path)
-    second_fgsea_sample_df = pd.read_csv(second_test_file_path)
-    assert first_fgsea_sample_df.equals(second_fgsea_sample_df)
+    sce.tl.gsea(input_gene_ranking_file=input_gene_ranking_file, hallmark_gene_sets_file=hallmark_gene_sets_file, type=type, out_dir=first_test_file_path, rscript_path = rscript_path, cache=True)
+    sce.tl.gsea(input_gene_ranking_file=input_gene_ranking_file, hallmark_gene_sets_file=hallmark_gene_sets_file, type=type, out_dir=second_test_file_path, rscript_path = rscript_path, cache=True)
+
+    first_gseapy_sample_df = pd.read_csv(first_test_file_path)
+    second_gseapy_sample_df = pd.read_csv(second_test_file_path)
+    assert first_gseapy_sample_df.equals(second_gseapy_sample_df)

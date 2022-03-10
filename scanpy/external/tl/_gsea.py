@@ -145,7 +145,7 @@ def gsea(
         Name of .rnk or .csv file of two columns. First column is gene names (string type) and
         second column (numberic type) is their respective rankings by weight
     hallmark_gene_sets_file
-        Name of .gmt or .csv file
+        Name of .gmt file
     type
         Type of GSEA: “gseapy” (default) or “fgsea”
     out_dir
@@ -208,9 +208,9 @@ def gsea(
                         'Only .rnk and .csv are supported for input gene ranking file'
                     )
 
-    if Path(hallmark_gene_sets_file).suffix not in ['.gmt', '.csv']:
+    if Path(hallmark_gene_sets_file).suffix != '.gmt':
         raise ValueError(
-                        'Only .gmt and .csv are supported for input hallmark gene sets file'
+                        'Only .gmt is supported for input hallmark gene sets file'
                     )
 
     # create cachedir if applicable
