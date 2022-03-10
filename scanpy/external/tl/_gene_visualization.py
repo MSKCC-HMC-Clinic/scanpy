@@ -23,6 +23,7 @@ def visualize_gene_signature(
     figsize: Optional[Tuple[float, float]] = (6.5,6),
     title: Optional[str] = None,
     # save: Union[bool, str, None] = None, # TODO: follow scanpy save vs show logic
+    out_pth: Optional[str] = None,
     return_fig: Optional[bool] = None,
 ) -> Union[Figure, Axes, None]:
 
@@ -86,7 +87,8 @@ def visualize_gene_signature(
     title = title if title else basis + ' colored by ' + visualization_type
     plt.title(title, fontsize = 14)
     plt.colorbar(ax)
-    plt.axis('off');
+    plt.axis('off')
+    plt.savefig(out_pth, figsize=figsize)
 
     if return_fig:
       return ax
