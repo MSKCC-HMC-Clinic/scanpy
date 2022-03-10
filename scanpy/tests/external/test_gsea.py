@@ -47,13 +47,14 @@ def test_gseapy():
     test_reproducibility('gseapy', input_gene_ranking_rnk, hallmark_gene_sets_gmt)
     test_reproducibility('gseapy', input_gene_ranking_csv, hallmark_gene_sets_gmt)
 
+
 def test_fgsea(
     rscript_path=None
 ):
     """
     Test reproducibility that type = 'fgsea' module option for gsea() works
     """
-  # clear and create cache
+    # clear and create cache
     sc.external.tl.clear_cache()
     sc.external.tl.create_cache()
 
@@ -67,19 +68,19 @@ def test_fgsea(
 
     # test reproducibility for fgsea
     test_reproducibility('fgsea', input_gene_ranking_rnk, hallmark_gene_sets_gmt, rscript_path)
-    # test_reproducibility('fgsea', input_gene_ranking_csv, hallmark_gene_sets_gmt, rscript_path)
+    test_reproducibility('fgsea', input_gene_ranking_csv, hallmark_gene_sets_gmt, rscript_path)
 
 
 def test_reproducibility(type, input_gene_ranking_file, hallmark_gene_sets_file, rscript_path=None):
-    
+
     cachedir = settings.cachedir
 
     # define paths for first and second files for comparison
     first_test_file_path = os.path.join(cachedir,'first_df.csv')
     second_test_file_path = os.path.join(cachedir,'second_df.csv')
 
-    sce.tl.gsea(input_gene_ranking_file=input_gene_ranking_file, hallmark_gene_sets_file=hallmark_gene_sets_file, type=type, out_dir=first_test_file_path, rscript_path = rscript_path, cache=True)
-    sce.tl.gsea(input_gene_ranking_file=input_gene_ranking_file, hallmark_gene_sets_file=hallmark_gene_sets_file, type=type, out_dir=second_test_file_path, rscript_path = rscript_path, cache=True)
+    sce.tl.gsea(input_gene_ranking_file=input_gene_ranking_file, hallmark_gene_sets_file=hallmark_gene_sets_file, type=type, out_dir=first_test_file_path, rscript_path=rscript_path, cache=True)
+    sce.tl.gsea(input_gene_ranking_file=input_gene_ranking_file, hallmark_gene_sets_file=hallmark_gene_sets_file, type=type, out_dir=second_test_file_path, rscript_path=rscript_path, cache=True)
 
     first_gseapy_sample_df = pd.read_csv(first_test_file_path)
     second_gseapy_sample_df = pd.read_csv(second_test_file_path)
