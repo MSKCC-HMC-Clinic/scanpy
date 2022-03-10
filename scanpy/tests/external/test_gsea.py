@@ -20,7 +20,7 @@ def test_gsea_barplot():
     test_file_path = '_images/test_gsea_barplot.png'
     if os.path.exists(test_file_path):
         os.remove(test_file_path)
-    gseapy_df = pd.read_csv('./_data/master_gseapy_df.csv')
+    gseapy_df = pd.read_csv('./_data/master_gsea_df.csv')
     sce.tl.gsea_barplot(gseapy_df, score='nes', color=['b','r'], out_dir='_images/test_gsea_barplot.png')
     assert compare_images('_images/test_gsea_barplot.png', '_images/master_gsea_barplot.png', tol=5) is None
 
