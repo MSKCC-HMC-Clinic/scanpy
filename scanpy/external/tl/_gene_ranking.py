@@ -212,11 +212,24 @@ def rank_gene(
         # normalize score in some way <- here you can play with different techniques
         # score_norm = score/len(cells_of_interest) # by total cells
         
+        sim_graph_interest_values = sim_graph_interest.values
+        sim_graph_interest_triu = np.triu(weight_dot_feature, k)
+
         if normalization_type == "by_total_transition_probability":
-            score_norm = score / np.sum(np.triu(sim_graph_interest.values, k))
+            score_norm = score / np.sum(np.triu(sim_graph_interest_values, k))
         elif normalization_type == "by_number_cells":
-            score_norm = score/len(cells_of_interest)
-           
+            score_norm = score / len(cells_of_interest)
+        elif normalization_type == "L1":
+            score_norm = score / np.sum(np.abs(sim_graph_interest_values))
+        elif normalization_type == "L2":
+            score_norm = score / np.sqrt(np.sum(np.square(sim_graph_interest)))
+        elif normalization_type == "log":
+            score_norm = np.sum(np.log(sim_graph_interest_values))
+        elif normalization_type == "mean":
+            score_norm = np.sum((sim_graph_interest_values - np.mean(sim_graph_interest_values))/(np.amax(sim_graph_interest_values) - np.amin(sim_graph_interest_values)))
+        elif normalization_type == "min_max_feature_scaling":
+            score_norm = np.sum((sim_graph_interest_values - np.amax(sim_graph_interest_values))/np.amax(sim_graph_interest_values) - np.amin(sim_graph_interest_values))
+        # elif normalization_type == "user_defined_feature_scaling":
             # Eve's Moran's I code
             # # Create the matrix of weigthts 
             # w = lat2W(sim_graph_interest.shape[0], sim_graph_interest.shape[1])
@@ -226,17 +239,14 @@ def rank_gene(
 
             # # Verify Moran's I results 
             # print(f"Moran's I Calculation: {round(mi.I,3)}")
-        # L1 matrix norm
-        # L2 matrix norm
-        # Normalize by convergence speed
-        # Normalize by cluster size
         # Normalize by concentration of transition matrix
         # Cluster covariance????
         # If no normalization implemented, return duplicate score
-        else:
+        elif normalization_type == None:
             score_norm = score
-            
-        # return
+        # Raise error if normalization type specified is not implemented
+        else: 
+            raise ValueError('Please provide a valid normalization type')  
         return score, score_norm
 
     dm_res = run_diffusion_maps(pd.DataFrame(adata.obsm['X_pca'], index=adata.obs_names),
