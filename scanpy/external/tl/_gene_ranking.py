@@ -204,6 +204,10 @@ def rank_gene(
             k = 0
         else:
             k = 1
+
+        # possible normalization of weight_dot_feature
+        #   min max, mean
+    
         # compute score
         # summing time: avoiding the j=i diagonal by summing the upper triangle
         score = np.sum(np.triu(weight_dot_feature, k))
@@ -242,6 +246,7 @@ def rank_gene(
         # Normalize by concentration of transition matrix
         # Cluster covariance????
         # If no normalization implemented, return duplicate score
+        # divide by variance
         elif normalization_type == None:
             score_norm = score
         # Raise error if normalization type specified is not implemented
