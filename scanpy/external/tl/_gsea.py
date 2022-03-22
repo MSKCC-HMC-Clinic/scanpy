@@ -143,7 +143,7 @@ def gsea(
     ----------
     input_gene_ranking_file
         Name of .rnk or .csv file of two columns. First column is gene names (string type) and
-        second column (numberic type) is their respective rankings by weight
+        second column (numberic type) is their respective rankings by weight, with NO header or index column
     hallmark_gene_sets_file
         Name of .gmt file
     type
@@ -247,7 +247,7 @@ def gsea(
                 assert ptypes.is_string_dtype(rnk.iloc[:,0])
                 assert ptypes.is_numeric_dtype(rnk.iloc[:,1])
             except AssertionError:
-                raise AssertionError('.csv format for input_gene_ranking_file is string type for gene list (first column) and numeric type for gene ranking values (second column).')
+                raise AssertionError('.csv format for input_gene_ranking_file is string type for gene list (first column) and numeric type for gene ranking values (second column) with NO header or index column.')
 
         # run gseapy, returns a prerank object
         pre_res = gp.prerank(
