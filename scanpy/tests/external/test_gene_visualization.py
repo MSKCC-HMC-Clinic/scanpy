@@ -19,7 +19,7 @@ def test_gene_visualization():
     Test that gene visualization method works on sample data
     """
     # remove old test file, if applicable
-    test_file_paths =['_images/test.png', '_images/test_compare.png']
+    test_file_paths = ['_images/test.png', '_images/test_compare.png']
     for path in test_file_paths:
         if os.path.exists(path):
             os.remove(path)
@@ -41,4 +41,4 @@ def test_gene_visualization():
 
     # test reproducibility, file location
     sce.tl.visualize_gene_signature(adata=adata, gene_signature=genes_of_interest, title='UMAP colored by average z-scored expression', basis='umap', return_fig=False, out_pth='_images/test_compare.png')
-    assert compare_images('_images/test.png', '_images/test_compare.png', tol=5) == None
+    assert compare_images('_images/test.png', '_images/test_compare.png', tol=5) is None
