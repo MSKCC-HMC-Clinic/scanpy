@@ -13,6 +13,7 @@ from splot.esda import moran_scatterplot,plot_moran
 from typing import Optional, Union, Mapping  # Special
 from typing import Sequence  # ABCs
 from typing import Tuple  # Classes
+import random
 
 def cluster_covariance(
     adata: AnnData,
@@ -24,9 +25,11 @@ def cluster_covariance(
     output_file: Optional['str'] = None,
     dpi: Optional[float] = 300,
     gene_choice: Optional['str'] = 'sum', 
+    gene_list: Optional['list'] = None,
+    n_genes: Optional[int] = 300,
     morans_i: Optional[bool] = False
 ):
-    """\
+    """
     Generates and optionally saves a covariance matrix across genes within a cluster. 
     Reports percent of genes with covariance greater than chosen threshold (default = 0).
     Optionally reports Moran's I calculation on covariance matrix and Moran's I scatterplot.
@@ -41,6 +44,9 @@ def cluster_covariance(
         Chosen cluster. 
     adata_version
         Use either adata.X or adata.layers['norm_log']. Input norm_log or default X.
+    threshold
+        Desired correlation threshold to measure percentage of genes with 
+        covariance greater than chosen threshold.
     adata_cluster_label
         The label for the clusters groupings in adata, default = 'clusters'
     title
@@ -55,6 +61,11 @@ def cluster_covariance(
         'variance' (choose n [300] genes with highest variance)
         'highly_variable' (choose highly variable genes: 
         comes from adata.var['highly_variable'] after calling scanpy.pp.highly_variable_genes)
+        'other': function uses user-specified gene list (see argument below).
+    gene_list
+        User-specified list of genes to explore.
+    n_genes
+        User-specified number of genes to explore.
     morans_i
         Whether or not to perform Morans I calculation and output corresponding plots.
     
@@ -73,54 +84,58 @@ def cluster_covariance(
     id_cells = np.where(adata.obs[adata_cluster_label] == cluster_id)[0]
 
     if adata_version == "adata.X":
-      data_subset = adata.X[id_cells, :]
+        data_subset = adata.X[id_cells, :].toarray()
     elif adata_version == "adata.layers['norm_log']":
-      data_subset = adata.layers['norm_log'][id_cells, :]
-
-    # Number of genes to investigate correlation structure of
-    n_genes = 300
+        data_subset = adata.layers['norm_log'][id_cells, :].toarray()
 
     if gene_choice == 'sum':
-      # Order genes based no their expression in descending order
-      gene_expr_order = np.argsort(np.sum(data_subset, axis = 0))[::-1]
+        gene_expr_order = np.argsort(np.sum(data_subset, axis = 0))[::-1]
     elif gene_choice == 'variance':
-      gene_expr_order = np.argsort(np.var(data_subset, axis = 0)**2)[::-1]
+        gene_expr_order = np.argsort(np.var(data_subset, axis = 0)**2)[::-1]
     elif gene_choice == 'highly_variable':
-      gene_expr_order = np.array([i for i,e in enumerate(adata.var['highly_variable']) if e == True])
-
+        gene_expr_order = np.array([i for i,e in enumerate(adata.var['highly_variable']) if e == True])
+    elif gene_choice == 'other':
+        gene_expr_order = [adata.var_names.get_loc(j) for j in gene_list if j in adata.var_names]
+        n_genes = len(gene_expr_order)
+        if n_genes > 500:
+            gene_expr_order = random.sample(gene_expr_order, 500)
+            n_genes = 500
+    #print(gene_expr_order)
     data_subset_ordered = data_subset[:, gene_expr_order[0:n_genes]]
     
     indices_to_delete = []
     num_cells, num_genes = data_subset_ordered.shape
     for i in range(num_genes):
-      if np.var(data_subset_ordered[:,i]) == 0: 
-        indices_to_delete.append(i)
+        if np.var(data_subset_ordered[:,i]) == 0: 
+            indices_to_delete.append(i)
     data_subset_ordered = np.delete(data_subset_ordered,indices_to_delete,1)
     print(f"WARNING: Performed covariance calculation on {n_genes-len(indices_to_delete)} of {n_genes} genes.")
 
     cov = np.corrcoef(data_subset_ordered.T)
 
-    tmp = sns.clustermap(cov,cmap='bwr', yticklabels="",xticklabels="", vmax=.5, center=0, vmin=-.5, 
-                        figsize = (6, 6))
-    plt.title('Cluster ' + str(cluster_id))
-    if output_file:
-      plt.savefig(output_file, format = output_file.split(".")[-1], dpi = dpi)
 
     all_cov_entries = np.concatenate(cov,axis=0)
     print(f"Percentage genes greater than correlation of {threshold}: {round((len(np.where(all_cov_entries>threshold)[0])/len(all_cov_entries))*100,3)}%")
 
     if morans_i:
-      # Create the matrix of weigthts 
-      w = lat2W(cov.shape[0], cov.shape[1])
-
-      # Crate the pysal Moran object 
-      mi = Moran(cov, w)
-
-      # Verify Moran's I results 
-      print(f"Moran's I Calculation: {round(mi.I,3)}") 
-
-      # "Spatial lag" is a weighted sum or a weighted average of the neighboring 
-      # values for the variable "(normalized) gene expression" in our case
-      moran_scatterplot(mi)
-      plt.xlabel("Covariance values")
-      plt.show()
+        # Create the matrix of weigthts 
+        w = lat2W(cov.shape[0], cov.shape[1])
+        
+        # Crate the pysal Moran object 
+        mi = Moran(cov, w)
+        
+        # Verify Moran's I results 
+        print(f"Moran's I Calculation: {round(mi.I,3)}") 
+        
+        # "Spatial lag" is a weighted sum or a weighted average of the neighboring 
+        # values for the variable "(normalized) gene expression" in our case
+        
+        moran_scatterplot(mi)
+        plt.xlabel("Covariance values")
+        plt.show()
+        
+    tmp = sns.clustermap(cov,cmap='bwr', yticklabels="",xticklabels="", vmax=.5, center=0, vmin=-.5, 
+                        figsize = (6, 6))
+    plt.title('Cluster ' + str(cluster_id) + ', Moran''s I = ' + str(round(mi.I,3)))
+    if output_file:
+        plt.savefig(output_file, format = output_file.split(".")[-1], dpi = dpi, bbox_inches = 'tight')
