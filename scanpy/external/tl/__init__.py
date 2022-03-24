@@ -6,4 +6,4 @@ from ._trimap import trimap
 from ._harmony_timeseries import harmony_timeseries
 from ._sam import sam
 from ._wishbone import wishbone
-from ._cluster_covariance import cluster_covariance
+from ._expression_frac import expression_frac
