@@ -27,7 +27,8 @@ def cluster_covariance(
     gene_choice: Optional['str'] = 'sum', 
     gene_list: Optional['list'] = None,
     n_genes: Optional[int] = 300,
-    morans_i: Optional[bool] = False
+    morans_i: Optional[bool] = False,
+    help: Optional[bool] = False
 ):
     """
     Generates and optionally saves a covariance matrix across genes within a cluster. 
@@ -68,6 +69,8 @@ def cluster_covariance(
         User-specified number of genes to explore.
     morans_i
         Whether or not to perform Morans I calculation and output corresponding plots.
+    help 
+        Print information on Morans I calculations.
     
     Returns
     -------
@@ -127,9 +130,6 @@ def cluster_covariance(
         # Verify Moran's I results 
         print(f"Moran's I Calculation: {round(mi.I,3)}") 
         
-        # "Spatial lag" is a weighted sum or a weighted average of the neighboring 
-        # values for the variable "(normalized) gene expression" in our case
-        
         moran_scatterplot(mi)
         plt.xlabel("Covariance values")
         plt.show()
@@ -139,3 +139,10 @@ def cluster_covariance(
     plt.title('Cluster ' + str(cluster_id) + ', Moran''s I = ' + str(round(mi.I,3)))
     if output_file:
         plt.savefig(output_file, format = output_file.split(".")[-1], dpi = dpi, bbox_inches = 'tight')
+
+    if help:
+        print("In Moran's I calculations:\n \
+            The slope is important in the scatterplot; a higher slope indicates a more spatially \
+            autocorrelated covariance matrix.\n \
+            Also, 'spatial lag' on the axis is a weighted sum or a weighted average of the \
+            neighboring values for the variable (normalized) gene expression in our case.")
