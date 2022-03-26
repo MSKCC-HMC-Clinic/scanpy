@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import scanpy as sc
+from scipy.sparse import csr_matrix
 
 from typing import Optional, Union, Mapping  # Special
 from typing import Sequence  # ABCs
@@ -11,7 +12,7 @@ from anndata import AnnData
 
 def expression_frac(
     adata: AnnData,
-    adata_version: Optional["str"] = "adata.X",
+    layer: Optional["str"] = None,
     genes: Optional["list"] = ["MT-"],
     xlabel: Optional['str'] = "%MT-Content",
     output_file: Optional['str'] = None,
@@ -26,6 +27,8 @@ def expression_frac(
         The annotated data matrix of shape `n_obs` × `n_vars`.
         Rows correspond to cells and columns to genes.
         Either adata or adata.layers['norm_log'].
+    layer 
+        Layer of adata to use instead of adata.X
     genes
         User-specified list of genes to explore (either specific gene set or prefix (["MT-"], ["RP-"])).
     xlabel 
@@ -46,21 +49,24 @@ def expression_frac(
     expression_frac(adata, genes = ["RP"], xlabel="%RP-Content")
 
   """
-    sc.pp.calculate_qc_metrics(adata, inplace = True)
+    
 
     if len(genes)==1:
       genes = adata.var_names[adata.var_names.str.startswith(genes[0])]      
     print(f"Gene list: {genes}.")
     index_genes = [adata.var_names.get_loc(j) for j in genes]
 
-    if adata_version == "adata.X":
-        frac = np.asarray(np.sum(adata.X[:, index_genes], axis = 1)/np.sum(adata.X, axis = 1)).squeeze() * 100
-    elif "layers" in adata_version:
-        layer = adata_version[adata_version.find('[')+1:adata_version.find(']')]
-        frac = np.asarray(np.sum(adata.layers[layer][:, index_genes], axis = 1)/np.sum(adata.X, axis = 1)).squeeze() * 100
+    if layer:
+        data = csr_matrix(adata.layers[layer])
+        expression_frac_array = np.asarray(np.sum(data[:, index_genes], axis = 1)/np.sum(data, axis = 1)).squeeze() * 100
+    else:
+        data = csr_matrix(adata.X)
+        expression_frac_array = np.asarray(np.sum(data[:, index_genes], axis = 1)/np.sum(data, axis = 1)).squeeze() * 100
 
-    expression_frac_array = np.asarray(np.sum(adata.X[:, index_genes], axis = 1)/np.sum(adata.X, axis = 1)).squeeze() * 100
     expression_frac_df = pd.DataFrame(expression_frac_array, index = adata.obs.index, columns = ["Expression fraction"])
+
+    log1p_total_counts = np.array(np.log(np.sum(data, axis = 1).flatten()))
+    log1p_n_genes_by_counts = np.array(np.log(np.sum(data > 0, axis = 1).flatten()))
 
     fig = plt.figure(figsize = (8*3, 6*1))
     ax = fig.add_subplot(1, 3, 1)
@@ -69,12 +75,12 @@ def expression_frac(
     ax.set_ylabel('Frequency', fontsize = 14)
 
     ax = fig.add_subplot(1, 3, 2)
-    ax.scatter(adata.obs['log1p_total_counts'], expression_frac_array);
+    ax.scatter(log1p_total_counts, expression_frac_array);
     ax.set_xlabel('Log library size', fontsize = 14)
     ax.set_ylabel(xlabel, fontsize = 14)
 
     ax = fig.add_subplot(1, 3, 3)
-    ax.scatter(adata.obs['log1p_n_genes_by_counts'], expression_frac_array);
+    ax.scatter(log1p_n_genes_by_counts, expression_frac_array);
     ax.set_xlabel('Log num. genes per cell', fontsize = 14)
     ax.set_ylabel(xlabel, fontsize = 14)
 
