@@ -4,14 +4,29 @@ import numpy as np
 import pandas as pd
 from anndata import AnnData
 from sklearn.neighbors import NearestNeighbors
-from scipy.sparse import coo_matrix
+from scipy.sparse import coo_matrix, csr_matrix
+
+from .._compat import Literal
+
+_Metric = Literal[
+    'euclidean',
+    'manhattan',
+    'chebyshev',
+    'minkowski',
+    'wminkowski',
+    'seuclidean',
+    'mahalanobis',
+    'hamming',
+    'canberra',
+    'braycurtis'
+]
 
 def mutual_nearest_neighbors(
   arr1: np.ndarray,   # not clear on what input formats will be valid
   arr2: np.ndarray,
   k1: int = 30,
   k2: int = 30,
-  dist_metric: str = 'euclidean',
+  dist_metric: _Metric = 'euclidean',
   connectivities: bool = False,
   n_jobs: int = -2
   ):
