@@ -21,7 +21,7 @@ _Metric = Literal[
     'braycurtis'
 ]
 
-def mutual_nearest_neighbors(
+def mnn_hmc(
   arr1: np.ndarray,   # not clear on what input formats will be valid
   arr2: np.ndarray,
   k1: int = 30,
