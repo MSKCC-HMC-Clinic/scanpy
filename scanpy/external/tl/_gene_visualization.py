@@ -73,10 +73,13 @@ def visualize_gene_signature(
         # first get zscores of each cell by genes in gene signature
         avg_zs = np.mean(scipy.stats.zscore(adata.X[:, gene_ids]), axis=1)  # mean across rows of zscores
 
-        # axs = ax if ax else plt.figure(figsize=figsize)
-        c = avg_zs
+        # color plot by average zscore of cells
+        color_by = avg_zs
 
-    ax = plt.scatter(adata.obsm[basis_id][:, 0], adata.obsm[basis_id][:, 1], s=2, c=c,
+    # else visualization_type == 'frechet':
+        # TODO: set color_by with frechet mean generated values
+
+    ax = plt.scatter(adata.obsm[basis_id][:, 0], adata.obsm[basis_id][:, 1], s=2, c=color_by,
                      cmap=cmap)
 
     title = title if title else basis + ' colored by ' + visualization_type
