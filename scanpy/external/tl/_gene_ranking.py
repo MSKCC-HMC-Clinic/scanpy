@@ -5,7 +5,6 @@ import anndata
 from matplotlib import axes
 import matplotlib.pyplot as plt
 import seaborn as sns
-import umap
 import phenograph
 from sklearn.neighbors import NearestNeighbors
 from typing import Union, Optional, List, Tuple, Sequence
@@ -13,13 +12,6 @@ import scipy
 import scipy.stats as stats
 from scipy.sparse import find, csr_matrix
 from scipy.sparse.linalg import eigs
-# import psysal 
-# from libpysal.weights import law2W
-# from esda.moran import Moran
-# from splot.esda import moran_scatterplot, plot_moran
-
-
-
 from anndata import AnnData
 
 from matplotlib.cm import get_cmap
@@ -76,6 +68,7 @@ def rank_gene(
     This is for the given factor and cell_group_by type:
     - 'by_number_cells': normalize by the total number of cells 
     - 'by_total_transition_probability': normalize by the sum of the transition matrix probabilities (follows self_autocorrelate parameter)
+    - TODO: add documentation for the rest
 
     Example
     -------
@@ -209,7 +202,6 @@ def rank_gene(
         #   min max, mean
     
         # compute score
-        # summing time: avoiding the j=i diagonal by summing the upper triangle
         score = np.sum(np.triu(weight_dot_feature, k))
 
         # TODO: play with normalization possibilities
@@ -227,12 +219,15 @@ def rank_gene(
             score_norm = score / np.sum(np.abs(sim_graph_interest_values))
         elif normalization_type == "L2":
             score_norm = score / np.sqrt(np.sum(np.square(sim_graph_interest)))
-        elif normalization_type == "log":
-            score_norm = np.sum(np.log(sim_graph_interest_values))
-        elif normalization_type == "mean":
-            score_norm = np.sum((sim_graph_interest_values - np.mean(sim_graph_interest_values))/(np.amax(sim_graph_interest_values) - np.amin(sim_graph_interest_values)))
-        elif normalization_type == "min_max_feature_scaling":
-            score_norm = np.sum((sim_graph_interest_values - np.amax(sim_graph_interest_values))/np.amax(sim_graph_interest_values) - np.amin(sim_graph_interest_values))
+        elif normalization_type == "feature_variance":
+            # normalize by how variable the feature is in our cells of interest
+            score_norm = score / np.var(weight_dot_feature)
+        # elif normalization_type == "log":
+        #     score_norm = np.sum(np.log(sim_graph_interest_values))
+        # elif normalization_type == "mean":
+        #     score_norm = np.sum((sim_graph_interest_values - np.mean(sim_graph_interest_values))/(np.amax(sim_graph_interest_values) - np.amin(sim_graph_interest_values)))
+        # elif normalization_type == "min_max_feature_scaling":
+        #     score_norm = np.sum((sim_graph_interest_values - np.amax(sim_graph_interest_values))/np.amax(sim_graph_interest_values) - np.amin(sim_graph_interest_values))
         # elif normalization_type == "user_defined_feature_scaling":
             # Eve's Moran's I code
             # # Create the matrix of weigthts 
@@ -334,6 +329,12 @@ def rank_gene_heatmap(
                    fmt = fmt, annot_kws = annot_kws, cbar = cbar)
 
     ax = g.ax_heatmap
-    ax.savefig(out_dir)
-    return ax
+    g.savefig(out_dir)
+    # output = plt.subplots()
+    # print(type(ax))
+    # ax.savefig(out_dir, dpi=400)
+    # fig = g.get_figure()
+    # fig.savefig(out_dir)
+    print('test')
+    return g.ax_heatmap
 
