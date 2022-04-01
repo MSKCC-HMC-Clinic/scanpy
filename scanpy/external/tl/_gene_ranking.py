@@ -13,6 +13,8 @@ import scipy.stats as stats
 from scipy.sparse import find, csr_matrix
 from scipy.sparse.linalg import eigs
 from anndata import AnnData
+import pandas.api.types as ptypes
+
 
 from matplotlib.cm import get_cmap
 cols = get_cmap('tab20').colors
@@ -68,7 +70,10 @@ def rank_gene(
     This is for the given factor and cell_group_by type:
     - 'by_number_cells': normalize by the total number of cells 
     - 'by_total_transition_probability': normalize by the sum of the transition matrix probabilities (follows self_autocorrelate parameter)
-    - TODO: add documentation for the rest
+    - 'L1': normalize using L1 normalization
+    - 'L2': normallize using L2 normalization
+    - 'feature_variance': normalize by how variable the featuer is in our cells of interest
+    - If no normalizaion option provided, duplicate score
 
     Example
     -------
@@ -86,7 +91,6 @@ def rank_gene(
         # Determine the kernel
 
         # Construct the distance matrix
-        print('Determing nearest neighbor graph using ' + metric + ' distance metric')
         nbrs = NearestNeighbors(n_neighbors=int(knn), metric=metric,
                                 n_jobs=n_jobs).fit(pca_projections.values)
         kNN = nbrs.kneighbors_graph(pca_projections.values, mode='distance')
@@ -102,7 +106,6 @@ def rank_gene(
         # Find the distance similarity via kernel
 
         # Kernel
-        print('Determing kernel')
         N = pca_projections.shape[0]  # number of dim we've reduced it down to
         x, y, dists = find(kNN)  # x - row indices, y - col indices, dists - non zero-values
 
@@ -206,7 +209,7 @@ def rank_gene(
 
         # TODO: play with normalization possibilities
         # normalize score in some way <- here you can play with different techniques
-        # score_norm = score/len(cells_of_interest) # by total cells
+        
         
         sim_graph_interest_values = sim_graph_interest.values
         sim_graph_interest_triu = np.triu(weight_dot_feature, k)
@@ -220,28 +223,9 @@ def rank_gene(
         elif normalization_type == "L2":
             score_norm = score / np.sqrt(np.sum(np.square(sim_graph_interest)))
         elif normalization_type == "feature_variance":
-            # normalize by how variable the feature is in our cells of interest
             score_norm = score / np.var(weight_dot_feature)
-        # elif normalization_type == "log":
-        #     score_norm = np.sum(np.log(sim_graph_interest_values))
-        # elif normalization_type == "mean":
-        #     score_norm = np.sum((sim_graph_interest_values - np.mean(sim_graph_interest_values))/(np.amax(sim_graph_interest_values) - np.amin(sim_graph_interest_values)))
-        # elif normalization_type == "min_max_feature_scaling":
-        #     score_norm = np.sum((sim_graph_interest_values - np.amax(sim_graph_interest_values))/np.amax(sim_graph_interest_values) - np.amin(sim_graph_interest_values))
-        # elif normalization_type == "user_defined_feature_scaling":
-            # Eve's Moran's I code
-            # # Create the matrix of weigthts 
-            # w = lat2W(sim_graph_interest.shape[0], sim_graph_interest.shape[1])
 
-            # #  Create the pysal Moran object 
-            # mi = Moran(sim_graph_interest, w)
-
-            # # Verify Moran's I results 
-            # print(f"Moran's I Calculation: {round(mi.I,3)}")
-        # Normalize by concentration of transition matrix
-        # Cluster covariance????
         # If no normalization implemented, return duplicate score
-        # divide by variance
         elif normalization_type == None:
             score_norm = score
         # Raise error if normalization type specified is not implemented
@@ -315,7 +299,13 @@ def rank_gene_heatmap(
     Matplotlib axes object
     
     """
-    
+
+    try:
+        assert ptypes.is_string_dtype(rank_gene_df.index)
+        assert rank_gene_df.shape[1] == rank_gene_df.select_dtypes(include=np.number).shape[1]
+    except AssertionError:
+        raise AssertionError('Format for rank_gene_df: index/header can be strings and all other values must be numeric type')
+
     zscore_temp = stats.zscore(abs(rank_gene_df), axis = zscore_by)
     max_abs_value = zscore_temp.max().max()
 
@@ -328,13 +318,6 @@ def rank_gene_heatmap(
                    vmin = vmin, vmax = vmax, annot = annot,
                    fmt = fmt, annot_kws = annot_kws, cbar = cbar)
 
-    ax = g.ax_heatmap
     g.savefig(out_dir)
-    # output = plt.subplots()
-    # print(type(ax))
-    # ax.savefig(out_dir, dpi=400)
-    # fig = g.get_figure()
-    # fig.savefig(out_dir)
-    print('test')
     return g.ax_heatmap
 

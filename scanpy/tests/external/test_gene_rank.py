@@ -4,6 +4,10 @@ import scanpy as sc
 import pandas as pd
 import scanpy.external as sce
 import os
+from matplotlib.testing.compare import compare_images
+from scipy.sparse import csr_matrix
+import anndata as ad
+import random
 
 # pytest.importorskip("rank_gene")
 
@@ -37,11 +41,20 @@ def test_gene_ranking():
     assert np.array_equal(ranked_df.index.to_numpy(), np.unique(adata.obs["Celltype_myeloid"]))
     return ranked_df
 
+
 def test_heat_map():
+
+    # remove old test file, if applicable
+    test_file_path = './_images/test_heatmap.png'
+    if os.path.exists(test_file_path):
+        os.remove(test_file_path)
+
     test_df_path = './_data/test_heatmap.csv'
-    ranked_df = pd.read_csv(test_df_path)
-    print(ranked_df)
-    return sce.tl.rank_gene_heatmap(ranked_df)
+    ranked_df = pd.read_csv(test_df_path, index_col=0)
+
+    sce.tl.rank_gene_heatmap(ranked_df, out_dir=test_file_path)
+    assert compare_images('_images/test_heatmap.png', '_images/master_heatmap.png', tol=5) is None
+
 
 def test_gene_ranking_normalization():
 
@@ -76,3 +89,33 @@ def test_gene_ranking_normalization():
     # #       ensure dimensions are as expected
     # # assert ranked_df.index.to_numpy().equals(np.unique(adata.obs["Celltype_myeloid"]))
     return ranked_df
+
+def test_gene_ranking_sample_data():
+    # create random, small sample adata
+    # single cell gene expression generally follows negative binomial distribution
+    counts = csr_matrix(np.random.poisson(1, size=(100, 2000)), dtype=np.float32)
+    adata = ad.AnnData(counts)
+    adata.obs_names = [f"Cell_{i:d}" for i in range(adata.n_obs)]
+    adata.var_names = [f"Gene_{i:d}" for i in range(adata.n_vars)]
+
+    # dimension reduction
+    sc.tl.pca(adata, svd_solver='arpack')
+    sc.pp.neighbors(adata, n_neighbors=10, n_pcs=40)
+    sc.tl.umap(adata)
+    adata.X = adata.X.toarray()  # convert compressed csr_matrix to ndarray
+
+    celltypes = ['A', 'B', 'C']
+    
+    conditions = [random.choice(celltypes) for i in range(len(adata.obs_names))]
+    
+    # obs: 'celltype' (Pandas Series: cell id by string val)
+    adata.obs['celltype'] = pd.Series(conditions, index=adata.obs_names)
+    
+    print(adata)
+
+    # obsm: 'X_factors' (cell id by factors), 
+    factors = pd.DataFrame(np.random.rand(len(adata.obs_names), 4), columns=['0','1','2','3'])
+    print("factor df?", factors, factors.shape)
+    adata.obsm['X_factors'] = factors
+    
+    print(adata)
