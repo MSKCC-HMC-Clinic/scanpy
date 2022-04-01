@@ -6,3 +6,6 @@ from ._trimap import trimap
 from ._harmony_timeseries import harmony_timeseries
 from ._sam import sam
 from ._wishbone import wishbone
+from ._joyplot import joyplot
+from ._adata_to_gene_expression_df import adata_to_gene_expression_df
+from ._joyplot import df_to_joyplot
