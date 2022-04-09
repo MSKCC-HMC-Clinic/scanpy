@@ -59,4 +59,4 @@ def test_nn_formatted():
 
     assert np.allclose(mutual_nearest_1.toarray(), distances_manhattan_1)
     assert np.allclose(mutual_nearest_1_c.toarray(), connectivity_manhattan_1)
-    assert np.allclose(mutual_nearest_2.toarray(), connectivity_euclidean
+    assert np.allclose(mutual_nearest_2.toarray(), connectivity_euclidean)
