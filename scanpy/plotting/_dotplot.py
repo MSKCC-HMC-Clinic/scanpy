@@ -127,6 +127,7 @@ class DotPlot(BasePlot):
         vmax: Optional[float] = None,
         vcenter: Optional[float] = None,
         norm: Optional[Normalize] = None,
+        saving_directory: Optional[str] = "",
         **kwds,
     ):
         BasePlot.__init__(
@@ -217,7 +218,9 @@ class DotPlot(BasePlot):
             dot_color_df = dot_color_df.loc[dot_size_df.index][dot_size_df.columns]
 
         self.dot_color_df = dot_color_df
+        dot_color_df.to_csv(saving_directory + "mean_expression_in_group_df.csv")
         self.dot_size_df = dot_size_df
+        dot_size_df.to_csv(saving_directory + "fraction_of_cells_in_group_(%)_df.csv")
 
         # Set default style parameters
         self.cmap = self.DEFAULT_COLORMAP
