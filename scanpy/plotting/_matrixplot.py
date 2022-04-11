@@ -113,6 +113,7 @@ class MatrixPlot(BasePlot):
         vmax: Optional[float] = None,
         vcenter: Optional[float] = None,
         norm: Optional[Normalize] = None,
+        saving_directory: Optional[str] = "",
         **kwds,
     ):
         BasePlot.__init__(
@@ -155,7 +156,8 @@ class MatrixPlot(BasePlot):
                 logg.warning('Unknown type for standard_scale, ignored')
 
         self.values_df = values_df
-
+        values_df.to_csv(saving_directory + "matrix_mean_expression_in_group_df.csv")
+        
         self.cmap = self.DEFAULT_COLORMAP
         self.edge_color = self.DEFAULT_EDGE_COLOR
         self.edge_lw = self.DEFAULT_EDGE_LW
