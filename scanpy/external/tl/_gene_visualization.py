@@ -13,7 +13,7 @@ import scipy
 def visualize_gene_signature(
     adata: AnnData,
     gene_signature: Sequence[str],
-    basis: str,  # Literal['pca', 'tsne', 'umap', 'diffmap', 'draw_graph_fr']
+    basis: str,
     visualization_type: str = 'zscore',
     cmap: Union[Colormap, str, None] = 'viridis',
     figsize: Optional[Tuple[float, float]] = (6.5,6),
@@ -36,7 +36,7 @@ def visualize_gene_signature(
     basis
         String that denotes a plotting tool that computed coordinates.
     visualization_type
-        String that denotes the values to plot for the color mapping. Options: 'zscore' (default). TODO: frechet mean
+        String that denotes the values to plot for the color mapping. Options: 'zscore' (default).
     title
         Figure title
     cmap
@@ -46,7 +46,11 @@ def visualize_gene_signature(
 
     Returns
     -------
-    RIGHT NOW: Matplotlib axes object
+    Matplotlib axes object
+
+    Notes
+    -----
+    Future work could include adding another visualization type, such as frechet mean
 
     Example
     -------
@@ -75,9 +79,6 @@ def visualize_gene_signature(
 
         # color plot by average zscore of cells
         color_by = avg_zs
-
-    # else visualization_type == 'frechet':
-        # TODO: set color_by with frechet mean generated values
 
     ax = plt.scatter(adata.obsm[basis_id][:, 0], adata.obsm[basis_id][:, 1], s=2, c=color_by,
                      cmap=cmap)
