@@ -13,8 +13,8 @@ from scanpy.external.pp import mnn_hmc
 # pytest.importorskip("mnn_hmc")
 
 # input data
-## Manhattan distance example 
-# x _ _ x _ 
+## Manhattan distance example
+# x _ _ x _
 # _ _ o _ x
 # o _ x _ o
 sample_data_x = np.array([[0,0],[0,3],[1,4],[2,2]])
@@ -48,14 +48,15 @@ connectivity_euclidean = np.array([
     [1., 0., 0.]
 ])
 
+
 def test_nn_formatted():
     # Compute neighbors, neighbors_formatted
     mutual_nearest_1 = sce.pp.mnn_hmc(arr1=sample_data_x, arr2=sample_data_o, k1=k1_neighbors_1,
-            k2=k2_neighbors, dist_metric='manhattan')
+                                      k2=k2_neighbors, dist_metric='manhattan')
     mutual_nearest_1_c = sce.pp.mnn_hmc(arr1=sample_data_x, arr2=sample_data_o, k1=k1_neighbors_1,
-            k2=k2_neighbors, dist_metric='manhattan', connectivities=True)
+                                        k2=k2_neighbors, dist_metric='manhattan', connectivities=True)
     mutual_nearest_2 = sce.pp.mnn_hmc(arr1=sample_data_x, arr2=sample_data_o, k1=k1_neighbors_2,
-            k2=k2_neighbors, dist_metric='euclidean', connectivities=True)
+                                      k2=k2_neighbors, dist_metric='euclidean', connectivities=True)
 
     assert np.allclose(mutual_nearest_1.toarray(), distances_manhattan_1)
     assert np.allclose(mutual_nearest_1_c.toarray(), connectivity_manhattan_1)
