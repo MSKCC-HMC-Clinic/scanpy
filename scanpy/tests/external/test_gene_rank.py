@@ -14,28 +14,38 @@ import random
 
 def create_sample_adata():
     """
-    create random, small sample adata with following properties:
+    Add sample factor data to sc.datasets.pbmc68k_reduced for testing gene ranking
 
-    AnnData object with factors {0, 1, 2, 3}
+    pbmc68k_reduced includes:
+        obs: 'bulk_labels', 'n_genes', 'percent_mito', 'n_counts', 'S_score', 'G2M_score', 'phase', 'louvain'
+        var: 'n_counts', 'means', 'dispersions', 'dispersions_norm', 'highly_variable'
+        uns: 'bulk_labels_colors', 'louvain', 'louvain_colors', 'neighbors', 'pca', 'rank_genes_groups'
+        obsm: 'X_pca', 'X_umap'
+        varm: 'PCs'
+        obsp: 'distances', 'connectivities'
 
+    This function adds:
+        obs: 'X_factors'
     """
 
     adata = sc.datasets.pbmc68k_reduced()
 
-    # obsm: 'X_factors' (cell id by factors), 
+    # add obsm: 'X_factors' (cell id by factors) with factors {0, 1, 2, 3}
     factors = pd.DataFrame(np.random.rand(len(adata.obs_names), 4), columns=['0','1','2','3'], index=adata.obs_names)
     adata.obsm['X_factors'] = factors
-    
+
     return adata
 
 
 def test_gene_ranking():
     """
-    Test basic functionality, given for_hmc.5ad dataset
+    Test basic functionality and reproducibility
     """
 
-    # get adata
+    # create adata
     adata = create_sample_adata()
+
+    # we use the 'phase' observations, which includes {'G1', 'G2M', 'S'}
     ranked_df = sce.tl.rank_gene(adata, "phase", 20)
 
     # test for reproducibility
@@ -65,17 +75,22 @@ def test_heat_map():
     assert compare_images('_images/test_heatmap.png', '_images/master_heatmap.png', tol=5) is None
 
 
-def test_gene_ranking_normalization():
+def test_gene_ranking_all():
     """
-    Test functionality of normalization types
+    Test basic functionality and reproducibility, including all normalization types
     """
 
-    normalization_types = ["by_total_transition_probability", "by_number_cells", "L1", "L2", "feature_variance"]
+    # None - non-normalized output score
+    normalization_types = [None, "by_total_transition_probability", "by_number_cells", "L1", "L2", "feature_variance"]
+
+    # create adata
 
     adata = create_sample_adata()
-    
+
     for normalization_type in normalization_types:
-        print("type:", normalization_type)
+        print("\n\ntype:", normalization_type)
+
+        # we use the 'phase' observations, which includes {'G1', 'G2M', 'S'}
         ranked_df = sce.tl.rank_gene(adata=adata, cell_group_by="phase", n_components=20, normalization_type=normalization_type)
         # test contents and dimensions of final df:
         # ensure row titles are as expected
