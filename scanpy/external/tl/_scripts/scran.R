@@ -6,31 +6,19 @@ dir.create(Sys.getenv('R_LIBS_USER'), recursive = TRUE)  # create personal libra
 
 print("inside R")
 
-install.packages(c('devtools'), repos = 'http://cran.us.r-project.org')
-install.packages(c('BiocManager'), repos = 'http://cran.us.r-project.org')
-library(BiocManager)
-# install('gage')
-library(devtools)
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install()
 
-# install.packages('scuttle')
 BiocManager::install("scuttle")
 BiocManager::install("scran")
 
-# install.packages(c('scuttle'), repos = 'http://cran.us.r-project.org')
-# install.packages(c('scran'), repos = 'http://cran.us.r-project.org')
 install.packages(c('anndata'), repos = 'http://cran.us.r-project.org')
 
-# install_github('ctlab/fgsea')
-
-# library(fgsea)
-# library(gage)
-# library(data.table)
-# library(ggplot2)
-# library(tools)
 library(scuttle)
 library(scran)
-# library(S4Vectors)
 library(anndata)
+library(SummarizedExperiment)
 
 
 args <- commandArgs(trailingOnly = TRUE)
@@ -59,13 +47,20 @@ print(adata_write_path)
 adata <- read_h5ad(adata_read_path)
 print(adata$layers)
 
+print("starting counts")
+print("test")
+
 # set up a single cell experiment object in R, using the raw data stored in 'X' in adata anndata object
-counts(adata) <- assay(adata, "X")
+counts(adata) <- SummarizedExperiment::assay(adata, "X") # ERROR HERE
+print(adata)
 
 print("Finished Setup")
 
+print("starting clustering")
 # As part of scran the cells need to be clustered
 clusters <- quickCluster(adata);
+print(type(clusters))
+print(clusters)
 print("Finished Clustering")
 
 # Get size factors from SCRAN

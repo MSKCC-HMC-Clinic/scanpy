@@ -76,9 +76,9 @@ def scran(
     args = [adata_path, norm_adata_out_dir]
     sce.tl.execute_r_script(rscript_path, 'scran.R', args, verbosity=verbosity)
 
-    adata = sc.read_h5ad(norm_adata_out_dir)
+    # adata = sc.read_h5ad(norm_adata_out_dir)
 
-    print("in python", adata)
+    # print("in python", adata)
     # if not cache:
     #     sce.tl.clear_cache()
     
