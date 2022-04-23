@@ -59,13 +59,7 @@ def scran(
     >>> adata_norm = scran(adata)
     >>> scran_norm = adata_norm.layers['scran_norm']
     """
-
-    # try:
-    #     import anndata2ri
-    #     import poetry
-    # except ImportError:
-    #     raise ImportError('Please install anndata2ri and poetry, ie `pip install anndata2ri`.')
-
+    # either adata or adata_read_path is provided
     try:
         if adata is not None:
             assert adata_read_path is None
@@ -78,20 +72,28 @@ def scran(
     cachedir = settings.cachedir
     sce.tl.create_cache()
     
+    # if no adata provided, read from path
     if adata is None:
         adata = sc.read_h5ad(adata_read_path)
 
+    # set values to be normalized, either specified layer or adata.X
     X = adata.layers[layer] if layer is not None else adata.X
 
+    # ensure X is sparse to be written as .mtx temporary file
     if not scipy.sparse.issparse(X):
         print("not sparse! making it so")
         X = csr_matrix(X)
 
-    mtx_input_path = os.path.join(cachedir, "input_mtx.mtx")
-    mtx_output_path = os.path.join(cachedir, "output_mtx.mtx")
+    # temporary file to be read from R script file
+    mtx_input_path = os.path.join(cachedir, "tmp_input.mtx")
+
+    # temporary file to be read in this function
+    mtx_output_path = os.path.join(cachedir, "tmp_output.mtx")
 
     sio.mmwrite(mtx_input_path, X) 
 
+    # provide input and output path to execute_r_script
+    # scran.R is located in _scripts
     args = [mtx_input_path, mtx_output_path]
     sce.tl.execute_r_script(rscript_path, 'scran.R', args, verbosity=verbosity)
 

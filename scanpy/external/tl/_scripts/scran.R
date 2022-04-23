@@ -41,14 +41,14 @@ print(mtx_input_path)
 print("write path")
 print(mtx_output_path)
 
-# adata <- read_h5ad(adata_read_path)
-# print(adata$layers)
-
 print("reading mtx")
 a <- Matrix::readMM(mtx_input_path)
 
 # transpose, because single cell experiements (sce) are gene x cell instead of cell x gene
 t <- t(a)
+
+print("dimensions")
+print(dim(t))
 
 print("creating single cell experiment")
 sce <- SingleCellExperiment(list(counts = t))
