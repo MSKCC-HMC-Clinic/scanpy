@@ -33,51 +33,24 @@ temp_dir_path <- args[2]
 mtx_input_path <- args[3]
 mtx_output_path <- args[4]
 
-print("temp dir")
-print(temp_dir_path)
-
-print("mtx path")
-print(mtx_input_path)
-print("write path")
-print(mtx_output_path)
-
-print("reading mtx")
 a <- Matrix::readMM(mtx_input_path)
 
 # transpose, because single cell experiements (sce) are gene x cell instead of cell x gene
 t <- t(a)
 
-print("dimensions")
-print(dim(t))
-
-print("creating single cell experiment")
+# create single cell experiment
 sce <- SingleCellExperiment(list(counts = t))
 
-print("sce:\n")
-print(sce)
-print("test")
-
-# set up a single cell experiment object in R, using the raw data stored in 'X' in adata anndata object
-# counts(adata) <- SummarizedExperiment::assay(adata, "X") # ERROR HERE
-# print(adata)
-
-# print("Finished Setup")
-
-print("starting clustering")
 # As part of scran the cells need to be clustered
 clusters <- quickCluster(sce);
 
-print("Finished Clustering")
-
 # Get size factors from SCRAN
 sce <- computeSumFactors(sce, clusters=clusters, positive=TRUE);
-print("Finished Computing Size Factors")
 
 # Normalize using SCRAN's size factors; each cell is divided by it's cluster specific factor
 # This is distinct from median library size normalization where one factor is used for all cells
 sce <- logNormCounts(sce); #divide counts by scran size factors
-print("Finished Normalization")
 
+# get logcounts and write to mtx file to be read from python function
 b <- logcounts(sce)
 Matrix::writeMM(b, mtx_output_path)
-

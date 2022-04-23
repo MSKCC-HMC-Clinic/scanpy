@@ -15,20 +15,14 @@ from scipy.sparse import csr_matrix
 
 # pytest.importorskip("scran")
 
-# def test_scran_X_compressed(rscript_path):
-#     """Test functionality using adata = sc.datasets.pbmc3k_processed with input adata.X, which is a compressed, sparse matrix"""
-
-#     pbmc = sc.datasets.pbmc3k_processed()
-#     normed_adata = sce.tl.scran(pbmc, rscript_path, verbosity=True)
-#     assert 'scran_norm' in normed_adata.layers
-
 def test_scran_X_compressed(rscript_path):
     """Test functionality using adata = sc.datasets.pbmc68k_reduced with input adata.X in compressed format"""
     pbmc = sc.datasets.pbmc68k_reduced()
     pbmc.X = csr_matrix(pbmc.X)
-    print(pbmc.X)
+    print(type(pbmc.X))
     normed_adata = sce.tl.scran(pbmc, rscript_path, verbosity=True)
     assert 'scran_norm' in normed_adata.layers
+    return normed_adata
 
 
 def test_scran_X_not_compressed(rscript_path):
@@ -61,32 +55,23 @@ def test_scran_adata_read_path(rscript_path):
     return normed_adata
 
 
-# def test_scran_copy(rscript_path):
-#     datapath = "./_data/pbmc10k.h5ad"
-#     adata = sc.read_h5ad(datapath)
-#     adata.layers['raw_data'] = adata.X.copy()
-#     adata_copy = sc.AnnData(X = np.asarray(adata.layers['raw_data'].todense()).copy(), 
-#                  obs = pd.DataFrame(index = adata.obs.index),
-#                  var = pd.DataFrame(index = adata.var.index))
-    
-#     sce.tl.scran(adata_copy, rscript_path, verbosity=True)
+def test_scran(rscript_path):
 
-# def test_scran(rscript_path):
+    # make sure this is sparse and you need to change adata.X to whichever data the user wants 
+    # this or adata.layers['raw_data'] or something like that
+    datapath = "./_data/pbmc10k.h5ad"
+    adata = sc.read_h5ad(datapath)
+    adata.layers['raw_data'] = adata.X.copy()
+    normed_adata = sce.tl.scran(adata, rscript_path, verbosity=True, cache=True)
 
-#     # make sure this is sparse and you need to change adata.X to whichever data the user wants 
-#     # this or adata.layers['raw_data'] or something like that
-#     datapath = "./_data/pbmc10k.h5ad"
-#     adata = sc.read_h5ad(datapath)
-#     adata.layers['raw_data'] = adata.X.copy()
-
-#     # sparse_matrix = adata_copy.X 
-#     # print(type(sparse_matrix))
-#     # sio.mmwrite("./_data/adata_X.mtx", sparse_matrix) 
-#     # sce.tl.scran(adata_copy, rscript_path, verbosity=True)
-
-#     normed_adata = sce.tl.scran(adata, rscript_path, verbosity=True, cache=True)
-
-#     assert 'scran_norm' in normed_adata.layers 
-#     return normed_adata
+    assert 'scran_norm' in normed_adata.layers 
+    return normed_adata
 
 
+def test_scran_reduced(rscript_path):
+    datapath = "./_data/0.1-pbmc10k.h5ad"
+    adata = sc.read_h5ad(datapath)
+    normed_adata = sce.tl.scran(adata, rscript_path, cache=True)
+    print("in test, past scran")
+    assert 'scran_norm' in normed_adata.layers 
+    return normed_adata

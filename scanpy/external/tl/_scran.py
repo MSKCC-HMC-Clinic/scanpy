@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 import scanpy as sc
 import scanpy.external as sce
 import os
-import shutil
 import pandas.api.types as ptypes
 from anndata import AnnData
 import scipy.io as sio
@@ -21,7 +20,6 @@ def scran(
     rscript_path: 'str' = None,
     layer: Optional[str] = None,
     adata_read_path: Optional['str'] = None,
-    adata_write_path: Optional['str'] = 'scran_adata',
     verbosity: Optional[bool] = False,
     cache: Optional[bool] = False
 ) -> AnnData:
@@ -43,8 +41,6 @@ def scran(
         If provided, use adata.layers[layer] for expression values instead of adata.X
     adata_read_path
         Optional file path to input annotated data matrix
-    norm_adata_out_dir
-        Optional file path to output annotated data matrix
     verbosity
         Passed in to execute_r_script. Default false
     cache
@@ -97,18 +93,15 @@ def scran(
     args = [mtx_input_path, mtx_output_path]
     sce.tl.execute_r_script(rscript_path, 'scran.R', args, verbosity=verbosity)
 
+    # read normalized output from running scran in R
     norm_X = sio.mmread(mtx_output_path)
+
+    # transpose back to cell x gene format
     transpose_norm_X = norm_X.transpose()
+    # add layer to adata
     adata.layers['scran_norm'] = transpose_norm_X
     
-    if adata_write_path is not None:
-        adata.write(adata_write_path)
-
     if not cache:
         sce.tl.clear_cache()
     
     return adata
-
-
-
-
