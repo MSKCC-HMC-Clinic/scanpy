@@ -6,7 +6,7 @@ import pandas as pd
 import scanpy as sc
 import scanpy.external as sce
 
-from scanpy.external import compute_entropy
+from scanpy.external.pp import compute_entropy
 
 # pytest.importorskip("compute_entropy")
 

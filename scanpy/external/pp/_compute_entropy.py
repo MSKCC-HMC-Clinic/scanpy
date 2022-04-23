@@ -55,8 +55,22 @@ def compute_entropy(
         inplace must be True as well.
     key_added 
         Defaults to `entropy`, allows user to store entropy data in 
-        adata.obs[key_added + ‘_’ + n_neighbors] if modifying adata or making copy 
+        adata.obs[key_added + '_' + n_neighbors] if modifying adata or making copy 
         to return. 
+
+    Returns
+    -------
+    :obj:‘None‘
+	    By default (``copy=False``), updates ``adata`` with the following field:
+	    ``adata.obs[‘key_added’ + `_` + k]`` (:class:`pd.Series`, dtype ``float64``)
+		A panda series indexed by cell, with entropy computed on the k nearest neighbors 
+        for the value. 
+
+    :class:`~anndata.Anndata`
+	    When ``copy=True`` is set, a copy of ``adata`` with those fields is returned.
+
+    :obj:`~pandas.Series`
+	    When inplace = False, returns the `pd.Series` alone, with index of cell ids, and datatype float64
     """
     # Preprocessing checks:
     if copy:
@@ -93,7 +107,7 @@ def compute_entropy(
     cell_to_batch = np.array([batch_map[sample_id] for sample_id in sample_ids])  # n cells -> batch id int
 
     # Compute entropy
-    output_df = pd.Series(index = adata.obs.index)
+    output_df = pd.Series(index = adata.obs.index, dtype='float64')
     for i in range(num_cells):
         # replace cell index w batch index, get unique+counts
         _, cts = np.unique(cell_to_batch[neighbor_inds[i]], return_counts=True)
