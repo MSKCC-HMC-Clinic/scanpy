@@ -49,8 +49,8 @@ connectivity_euclidean = np.array([
 ])
 
 
-def test_nn_formatted():
-    # Compute neighbors, neighbors_formatted
+def test_mnn_hmc():
+    # Compute mutual nearest neighbors
     mutual_nearest_1 = sce.pp.mnn_hmc(arr1=sample_data_x, arr2=sample_data_o, k1=k1_neighbors_1,
                                       k2=k2_neighbors, dist_metric='manhattan')
     mutual_nearest_1_c = sce.pp.mnn_hmc(arr1=sample_data_x, arr2=sample_data_o, k1=k1_neighbors_1,
